@@ -1,0 +1,611 @@
+/* =====================
+   CLEAN MINIMAL AUTH PAGES - MY CAFE
+   Simple, Elegant, Professional
+   FIXED: Password eye inside input
+===================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Clean Minimal Dark Theme */
+    --auth-bg-dark: #0f172a;
+    --auth-card-dark: #1e293b;
+    --auth-card-border-dark: #334155;
+    --auth-text-dark: #f1f5f9;
+    --auth-text-muted-dark: #94a3b8;
+    --auth-accent: #3b82f6;
+    --auth-accent-hover: #2563eb;
+    --auth-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    
+    /* Clean Minimal Light Theme */
+    --auth-bg-light: #f8fafc;
+    --auth-card-light: #ffffff;
+    --auth-card-border-light: #e2e8f0;
+    --auth-text-light: #1e293b;
+    --auth-text-muted-light: #64748b;
+}
+
+/* Reset and Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Auth Body - Clean and Minimal */
+.auth-body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--auth-bg-dark);
+    color: var(--auth-text-dark);
+    padding: 1.5rem;
+    transition: background 0.3s ease;
+}
+
+body.light .auth-body {
+    background: var(--auth-bg-light);
+    color: var(--auth-text-light);
+}
+
+/* Simple Background Pattern - Very Subtle */
+.auth-body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 20%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Auth Card - Clean and Simple */
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 2.5rem;
+    background: var(--auth-card-dark);
+    border: 1px solid var(--auth-card-border-dark);
+    border-radius: 12px;
+    box-shadow: var(--auth-shadow);
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 0.4s ease-out;
+}
+
+body.light .auth-card {
+    background: var(--auth-card-light);
+    border-color: var(--auth-card-border-light);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Signup Card - Slightly Larger */
+.signup-card {
+    max-width: 450px;
+    padding: 2.5rem;
+}
+
+/* Header */
+.auth-card h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--auth-text-dark);
+    letter-spacing: -0.025em;
+}
+
+body.light .auth-card h1 {
+    color: var(--auth-text-light);
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: var(--auth-text-muted-dark);
+    margin-bottom: 2rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+body.light .subtitle {
+    color: var(--auth-text-muted-light);
+}
+
+/* Simple Form */
+.auth-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Input Fields - Clean */
+.auth-card input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: transparent;
+    border: 1px solid var(--auth-card-border-dark);
+    border-radius: 8px;
+    color: var(--auth-text-dark);
+    font-size: 0.95rem;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    outline: none;
+    position: relative;
+}
+
+body.light .auth-card input {
+    border-color: var(--auth-card-border-light);
+    color: var(--auth-text-light);
+}
+
+.auth-card input::placeholder {
+    color: var(--auth-text-muted-dark);
+    opacity: 0.7;
+}
+
+body.light .auth-card input::placeholder {
+    color: var(--auth-text-muted-light);
+}
+
+.auth-card input:focus {
+    border-color: var(--auth-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* =====================================================
+   FIXED PASSWORD EYE ICON - BETTER POSITIONING
+   Replace the existing .input-group and .password-toggle 
+   sections in your auth.css with this
+===================================================== */
+
+/* Password Input Group - FIXED */
+.input-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-group input {
+    width: 100%;
+    padding-right: 3rem !important; /* Space for eye icon */
+}
+
+/* Password toggle INSIDE input */
+.password-toggle {
+    position: absolute;
+    right: 12px; /* Reduced from 1rem */
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--auth-text-muted-dark);
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    z-index: 2;
+}
+
+body.light .password-toggle {
+    color: var(--auth-text-muted-light);
+}
+
+.password-toggle:hover {
+    color: var(--auth-accent);
+}
+
+/* Adjust password input padding for eye icon */
+.auth-card input[type="password"],
+.auth-card input[type="text"]#password,
+.auth-card input[type="text"]#confirmPassword {
+    padding-right: 45px !important; /* Space for eye icon */
+}
+
+/* Password Strength - Minimal */
+.password-strength {
+    height: 3px;
+    background: var(--auth-card-border-dark);
+    border-radius: 2px;
+    margin-top: 0.25rem;
+    overflow: hidden;
+}
+
+body.light .password-strength {
+    background: var(--auth-card-border-light);
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    background: var(--auth-accent);
+}
+
+
+/* Touch devices - larger hit area */
+@media (hover: none) and (pointer: coarse) {
+    .password-toggle {
+        width: 3.5rem;
+        min-height: 44px;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .password-toggle {
+        right: 0;
+        width: 2.5rem;
+    }
+    
+    .input-group input {
+        padding-right: 2.75rem !important;
+    }
+}
+
+/* Button - Clean and Simple */
+.auth-card button {
+    width: 100%;
+    padding: 0.875rem;
+    background: var(--auth-accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.5rem;
+}
+
+.auth-card button:hover {
+    background: var(--auth-accent-hover);
+    transform: translateY(-1px);
+}
+
+.auth-card button:active {
+    transform: translateY(0);
+}
+
+/* Divider - Minimal */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    color: var(--auth-text-muted-dark);
+    font-size: 0.85rem;
+}
+
+body.light .divider {
+    color: var(--auth-text-muted-light);
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--auth-card-border-dark);
+}
+
+body.light .divider::before,
+body.light .divider::after {
+    background: var(--auth-card-border-light);
+}
+
+.divider::before {
+    margin-right: 1rem;
+}
+
+.divider::after {
+    margin-left: 1rem;
+}
+
+/* Links */
+.small-text {
+    font-size: 0.9rem;
+    color: var(--auth-text-muted-dark);
+    margin-top: 1rem;
+}
+
+body.light .small-text {
+    color: var(--auth-text-muted-light);
+}
+
+.small-text a {
+    color: var(--auth-accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.small-text a:hover {
+    color: var(--auth-accent-hover);
+    text-decoration: underline;
+}
+
+/* Messages */
+.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    animation: slideDown 0.3s ease-out;
+}
+
+.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Terms */
+.terms {
+    font-size: 0.8rem;
+    color: var(--auth-text-muted-dark);
+    margin-top: 1rem;
+    text-align: center;
+    line-height: 1.5;
+}
+
+body.light .terms {
+    color: var(--auth-text-muted-light);
+}
+
+.terms a {
+    color: var(--auth-accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.terms a:hover {
+    text-decoration: underline;
+}
+
+/* Back to Home Link - Simple */
+.back-home {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 10;
+}
+
+.back-home a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--auth-text-muted-dark);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
+body.light .back-home a {
+    color: var(--auth-text-muted-light);
+}
+
+.back-home a:hover {
+    color: var(--auth-accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+/* Loading State */
+.auth-card form.loading button {
+    position: relative;
+    color: transparent;
+}
+
+.auth-card form.loading button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .auth-body {
+        padding: 1rem;
+        align-items: flex-start;
+        padding-top: 3rem;
+    }
+    
+    .auth-card {
+        padding: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .signup-card {
+        padding: 2rem;
+    }
+    
+    .auth-card h1 {
+        font-size: 1.75rem;
+    }
+    
+    .back-home {
+        top: 1rem;
+        left: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-body {
+        padding: 0.75rem;
+        padding-top: 2.5rem;
+    }
+    
+    .auth-card {
+        padding: 1.5rem;
+        border-radius: 10px;
+    }
+    
+    .signup-card {
+        padding: 1.5rem;
+    }
+    
+    .auth-card h1 {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .auth-card input {
+        padding: 0.75rem;
+        padding-right: 40px !important; /* Adjusted for mobile */
+    }
+    
+    .password-toggle {
+        right: 10px; /* Adjusted for mobile */
+    }
+    
+    .auth-card button {
+        padding: 0.75rem;
+    }
+    
+    .back-home a {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+/* Very Small Screens */
+@media (max-width: 320px) {
+    .auth-card {
+        padding: 1.25rem;
+    }
+    
+    .auth-card h1 {
+        font-size: 1.25rem;
+    }
+    
+    .auth-card form {
+        gap: 0.75rem;
+    }
+    
+    .auth-card input {
+        padding: 0.65rem;
+        padding-right: 38px !important;
+    }
+    
+    .password-toggle {
+        right: 8px;
+    }
+    
+    .divider {
+        margin: 1rem 0;
+    }
+}
+
+/* Touch Targets for Mobile */
+@media (hover: none) and (pointer: coarse) {
+    .auth-card input,
+    .auth-card button,
+    .password-toggle,
+    .back-home a {
+        min-height: 44px;
+    }
+    
+    .password-toggle {
+        width: 44px;
+        height: 44px;
+        right: 8px;
+    }
+    
+    .auth-card input[type="password"],
+    .auth-card input[type="text"]#password,
+    .auth-card input[type="text"]#confirmPassword {
+        padding-right: 52px !important; /* More space for larger button */
+    }
+}
+
+/* Safe Area Insets */
+@supports (padding: max(0px)) {
+    .auth-body {
+        padding-left: max(1.5rem, env(safe-area-inset-left));
+        padding-right: max(1.5rem, env(safe-area-inset-right));
+        padding-top: max(1.5rem, env(safe-area-inset-top));
+        padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    }
+    
+    .back-home {
+        top: max(1.5rem, env(safe-area-inset-top));
+        left: max(1.5rem, env(safe-area-inset-left));
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .auth-card,
+    .success,
+    .error,
+    .auth-card input,
+    .auth-card button {
+        animation: none !important;
+        transition: none !important;
+    }
+}

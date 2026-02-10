@@ -1,0 +1,346 @@
+<!-- File: templates/bill.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<div class="bill-page">
+    <div class="bill-header">
+        <h1>🍽️ Your Bill</h1>
+        <p class="bill-subtitle">Order #{{ order_id }} • {{ bill_date }}</p>
+    </div>
+
+    <div class="bill-container">
+        <div class="bill-card">
+            <!-- Bill Header -->
+            <div class="bill-meta">
+                <div class="bill-number">
+                    <span class="label">Bill No:</span>
+                    <strong>{{ bill.bill_number }}</strong>
+                </div>
+                <div class="bill-date">
+                    <span class="label">Date:</span>
+                    <span>{{ bill_date }}</span>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            {% if order.guest_name %}
+            <div class="customer-info">
+                <h3>Customer</h3>
+                <p>{{ order.guest_name }}</p>
+                {% if order.table_id %}
+                <p>Table: {{ order.table_id }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Items Table -->
+            <div class="items-table">
+                <h3>Order Items</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹{{ item.price_per }}</td>
+                            <td>₹{{ item.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="totals-section">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ bill.subtotal }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax ({{ bill.tax_rate }}%)</span>
+                    <span>₹{{ bill.tax_amount }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Service Charge ({{ bill.service_charge_rate }}%)</span>
+                    <span>₹{{ bill.service_charge_amount }}</span>
+                </div>
+                <div class="total-row grand-total">
+                    <strong>Grand Total</strong>
+                    <strong>₹{{ bill.grand_total }}</strong>
+                </div>
+            </div>
+
+            <!-- Payment Status -->
+            <div class="payment-status">
+                <h3>Payment Status</h3>
+                <div class="status-badge {{ order.payment_method }}">
+                    {{ order.payment_method|capitalize }}
+                </div>
+                {% if order.payment_method == 'pending' %}
+                <p class="payment-note">Payment pending at counter</p>
+                {% endif %}
+            </div>
+
+            <!-- Footer -->
+            <div class="bill-footer">
+                <div class="thank-you">
+                    <h3>Thank you for dining with us!</h3>
+                    <p>We hope to serve you again soon.</p>
+                </div>
+                <div class="legal-footer">
+                    <p><strong>Powered by MY CAFE</strong></p>
+                    <p class="small-text">Your data is securely stored and used only for order processing.</p>
+                    <p class="small-text">GSTIN: 29ABCDE1234F1Z5 | Contact: 1800-MY-CAFE</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bill-actions">
+            <button class="btn" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Bill
+            </button>
+            <a href="/orders" class="btn ghost">
+                <i class="fas fa-history"></i> Order History
+            </a>
+            {% if order.status == 'ready' %}
+            <div class="ready-alert">
+                <i class="fas fa-bell"></i>
+                <span>Your order is ready for pickup!</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .bill-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .bill-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .bill-header h1 {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .bill-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    .bill-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 2rem;
+    }
+
+    .bill-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(225, 112, 85, 0.1);
+    }
+
+    .bill-number strong {
+        font-size: 1.2rem;
+        color: var(--primary);
+    }
+
+    .label {
+        color: var(--text-muted);
+        margin-right: 0.5rem;
+    }
+
+    .items-table {
+        margin: 2rem 0;
+    }
+
+    .items-table h3 {
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: rgba(225, 112, 85, 0.1);
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    td {
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(225, 112, 85, 0.1);
+    }
+
+    tr:hover {
+        background: rgba(225, 112, 85, 0.05);
+    }
+
+    .totals-section {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(225, 112, 85, 0.05);
+        border-radius: var(--radius-md);
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px dashed rgba(225, 112, 85, 0.2);
+    }
+
+    .grand-total {
+        font-size: 1.5rem;
+        color: var(--primary);
+        border-bottom: none;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid var(--primary);
+    }
+
+    .payment-status {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(129, 199, 132, 0.1);
+        border-radius: var(--radius-md);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .status-badge.paid {
+        background: rgba(46, 204, 113, 0.2);
+        color: #27ae60;
+    }
+
+    .status-badge.pending {
+        background: rgba(241, 196, 15, 0.2);
+        color: #f39c12;
+    }
+
+    .status-badge.cash {
+        background: rgba(52, 152, 219, 0.2);
+        color: #3498db;
+    }
+
+    .payment-note {
+        margin-top: 0.5rem;
+        font-style: italic;
+        color: var(--text-muted);
+    }
+
+    .bill-footer {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid rgba(225, 112, 85, 0.1);
+        text-align: center;
+    }
+
+    .thank-you h3 {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .legal-footer {
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .small-text {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .bill-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .ready-alert {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.8;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @media print {
+        .bill-actions {
+            display: none;
+        }
+
+        .bill-card {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+
+        /* Dark mode fixes */
+        body.dark .bill-card,
+        body.dark .legal-content {
+            background: var(--card-light);
+            color: var(--text-dark);
+        }
+
+        body.dark .bill-card h3,
+        body.dark .bill-card .label,
+        body.dark .bill-card th,
+        body.dark .bill-card td {
+            color: var(--text-dark);
+        }
+    }
+</style>
+
+{% endblock %}
