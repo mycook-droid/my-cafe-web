@@ -270,6 +270,10 @@ def qr_scanner():
     # Clear any existing table session when coming here
     session.pop("table", None)
     session.pop("session_token", None)
+    
+    # Set the flag to indicate user came through QR scanner
+    session["qr_scanner_completed"] = True  # ADD THIS LINE
+    
     return render_template("qr_scanner.html")
 
 
@@ -278,12 +282,9 @@ def qr_scanner():
 def order():
     cart = get_cart()
 
-    # Check if user has been through QR scanner or has a table session
-    # Allow if they have a table session OR if they're coming from QR scanner
-    if "table" not in session:
-        # Check if we should redirect back to QR scanner
-        # You could add a session flag here
-        # For now, we'll redirect if no table is set
+    # Check if user has been through QR scanner OR has a table session
+    # session.get("qr_scanner_completed") is True when coming from QR scanner
+    if "table" not in session and not session.get("qr_scanner_completed"):
         return redirect("/qr_scanner")
 
     return render_template(
