@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="menu-page">
+    <h1>Our Menu</h1>
+    <p class="tagline">Curated with love | Fresh ingredients | Premium quality</p>
+
+    <!-- Search Bar -->
+    <div class="menu-search">
+        <i class="fas fa-search"></i>
+        <input 
+            type="text" 
+            id="menuSearch" 
+            placeholder="Search for your favorite dish..."
+            onkeyup="searchMenu()"
+        >
+    </div>
+
+    <!-- Menu Booklet Container -->
+    <div class="menu-booklet">
+        <div class="booklet-page" id="currentPage">
+            <!-- Dynamic content loaded here -->
+        </div>
+
+        <!-- Page Navigation -->
+        <div class="page-navigation">
+            <button class="page-nav-btn" id="prevBtn" onclick="previousPage()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="page-indicator">
+                <span id="currentPageNum">1</span> / <span id="totalPages">1</span>
+            </div>
+            
+            <button class="page-nav-btn" id="nextBtn" onclick="nextPage()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="image-modal" onclick="closeImageModal()">
+    <img id="modalImage" src="" alt="Food Item" onclick="event.stopPropagation()">
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+<style>
+    /* Fix for quantity buttons and numbers */
+    .qty {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 157, 0, 0.1);
+        border: 1px solid rgba(255, 157, 0, 0.3);
+        border-radius: 8px;
+        padding: 0.25rem 0.5rem;
+        min-width: 100px;
+        justify-content: center;
+    }
+    
+    .qty button {
+        background: #ff9d00;
+        color: white;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        line-height: 1;
+    }
+    
+    .qty button:hover {
+        background: #ff6b00;
+        transform: scale(1.1);
+    }
+    
+    .qty button:active {
+        transform: scale(0.95);
+    }
+    
+    .qty span {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2d1b00;
+        min-width: 30px;
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+        text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+    }
+    
+    /* Fix menu item hover */
+    .menu-item {
+        transition: all 0.2s;
+        cursor: default !important;
+    }
+    
+    .menu-item:hover {
+        transform: translateY(-2px);
+        cursor: default !important;
+    }
+    
+    .menu-item .image-icon {
+        cursor: pointer;
+    }
+    
+    .menu-item .image-icon:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Disabled state for unavailable items */
+    .menu-item.unavailable {
+        opacity: 0.7;
+        background: rgba(239, 68, 68, 0.05) !important;
+    }
+    
+    .menu-item.unavailable .item-name,
+    .menu-item.unavailable .item-price {
+        color: #999 !important;
+    }
+    
+    .menu-item.unavailable .image-icon {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .menu-item.unavailable .qty {
+        display: none !important;
+    }
+    
+    .unavailable-badge {
+        display: inline-block;
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+// Menu Data (from Flask)
+const menuData = {{ menu | tojson | safe }};
+const quantities = {{ quantities | tojson | safe }};
+
+// Category names in order
+const categories = Object.keys(menuData);
+let currentCategory = 0;
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateTotalPages();
+    renderPage(currentCategory);
+    updateNavigationButtons();
+    
+    // Swipe support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    const booklet = document.querySelector('.booklet-page');
+    
+    booklet.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    booklet.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        if (touchEndX < touchStartX - 50) nextPage();
+        if (touchEndX > touchStartX + 50) previousPage();
+    }
+});
+
+function updateTotalPages() {
+    document.getElementById('totalPages').textContent = categories.length;
+}
+
+function renderPage(categoryIndex) {
+    const category = categories[categoryIndex];
+    const items = menuData[category];
+    
+    const pageContent = `
+        <h2 class="category-title">${category}</h2>
+        <div class="menu-items">
+            ${Object.entries(items).map(([itemName, price]) => `
+                <div class="menu-item" data-item="${itemName}">
+                    <div class="image-icon" onclick="showImageModal('${itemName}')" title="View Image">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    
+                    <div class="item-info">
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-price">₹${price}</div>
+                    </div>
+                    
+                    <div class="qty" id="qty-${itemName.replace(/ /g, '-')}">
+                        <button onclick="updateQty('${itemName}', 'remove')">−</button>
+                        <span id="qty-count-${itemName.replace(/ /g, '-')}">${quantities[itemName] || 0}</span>
+                        <button onclick="updateQty('${itemName}', 'add')">+</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    document.getElementById('currentPage').innerHTML = pageContent;
+    document.getElementById('currentPageNum').textContent = categoryIndex + 1;
+    
+    // Check availability from API
+    refreshAvailability();
+}
+
+function nextPage() {
+    if (currentCategory < categories.length - 1) {
+        currentCategory++;
+        renderPage(currentCategory);
+        updateNavigationButtons();
+    }
+}
+
+function previousPage() {
+    if (currentCategory > 0) {
+        currentCategory--;
+        renderPage(currentCategory);
+        updateNavigationButtons();
+    }
+}
+
+function updateNavigationButtons() {
+    document.getElementById('prevBtn').disabled = currentCategory === 0;
+    document.getElementById('nextBtn').disabled = currentCategory === categories.length - 1;
+}
+
+function searchMenu() {
+    const query = document.getElementById('menuSearch').value.toLowerCase().trim();
+    
+    if (!query) {
+        renderPage(currentCategory);
+        return;
+    }
+    
+    // Find category and item
+    for (let i = 0; i < categories.length; i++) {
+        const category = categories[i];
+        const items = menuData[category];
+        
+        // Check if category matches
+        if (category.toLowerCase().includes(query)) {
+            currentCategory = i;
+            renderPage(i);
+            updateNavigationButtons();
+            return;
+        }
+        
+        // Check if any item matches
+        for (let itemName in items) {
+            if (itemName.toLowerCase().includes(query)) {
+                currentCategory = i;
+                renderPage(i);
+                updateNavigationButtons();
+                
+                // Highlight matched item
+                setTimeout(() => {
+                    const itemEl = document.querySelector(`[data-item="${itemName}"]`);
+                    if (itemEl) {
+                        itemEl.style.background = 'rgba(255, 157, 0, 0.15)';
+                        itemEl.style.transform = 'scale(1.02)';
+                        itemEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        setTimeout(() => {
+                            itemEl.style.background = '';
+                            itemEl.style.transform = '';
+                        }, 2000);
+                    }
+                }, 300);
+                
+                return;
+            }
+        }
+    }
+}
+
+// Image Modal Functions
+function showImageModal(itemName) {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('modalImage');
+    
+    // Get image URL (from default images or database)
+    const imageUrl = getItemImageUrl(itemName);
+    
+    img.src = imageUrl;
+    modal.classList.add('active');
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.remove('active');
+}
+
+// Load custom images from admin
+let customImages = {};
+
+fetch('/api/menu-images')
+    .then(r => r.json())
+    .then(data => {
+        customImages = data;
+    })
+    .catch(() => console.log('No custom images'));
+
+function getItemImageUrl(itemName) {
+    // Check if admin uploaded custom image
+    if (customImages[itemName]) {
+        return customImages[itemName];
+    }
+    
+    // Fallback to default images
+    const itemImages = {
+        'Margherita': 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600',
+        'Farmhouse': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600',
+        // ... rest of default images ...
+    };
+    
+    return itemImages[itemName] || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600';
+}
+
+async function updateQty(item, action) {
+    try {
+        const response = await fetch("/" + action, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ item })
+        });
+        
+        const data = await response.json();
+        
+        // Update quantity display
+        const qtySpan = document.getElementById(`qty-count-${item.replace(/ /g, '-')}`);
+        if (qtySpan) {
+            qtySpan.textContent = data.cart[item] || 0;
+            
+            // Add animation effect
+            qtySpan.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                qtySpan.style.transform = 'scale(1)';
+            }, 200);
+        }
+        
+        // Update cart in base.html
+        if (window.renderCart) {
+            window.renderCart(data.cart, data.total);
+        }
+        if (window.updateCartBadge) {
+            window.updateCartBadge();
+        }
+        
+    } catch (error) {
+        console.error("Error updating quantity:", error);
+    }
+}
+
+async function refreshAvailability() {
+    try {
+        const response = await fetch("/api/menu");
+        if (!response.ok) return;
+        
+        const menuApi = await response.json();
+        
+        // Update item availability
+        document.querySelectorAll('.menu-item').forEach(itemEl => {
+            const itemName = itemEl.dataset.item;
+            
+            // Find in API response
+            for (const category in menuApi) {
+                if (menuApi[category][itemName]) {
+                    const itemData = menuApi[category][itemName];
+                    
+                    if (itemData.is_available === 0) {
+                        itemEl.classList.add('unavailable');
+                        
+                        // Add badge if not present
+                        if (!itemEl.querySelector('.unavailable-badge')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'unavailable-badge';
+                            badge.textContent = 'Currently unavailable';
+                            itemEl.querySelector('.item-info').appendChild(badge);
+                        }
+                        
+                        // Hide quantity controls
+                        const qtyEl = itemEl.querySelector('.qty');
+                        if (qtyEl) qtyEl.style.display = 'none';
+                        
+                        // Disable image click
+                        const imageIcon = itemEl.querySelector('.image-icon');
+                        if (imageIcon) {
+                            imageIcon.style.cursor = 'not-allowed';
+                            imageIcon.style.opacity = '0.5';
+                            imageIcon.onclick = null;
+                        }
+                    } else {
+                        itemEl.classList.remove('unavailable');
+                        
+                        // Remove badge
+                        const badge = itemEl.querySelector('.unavailable-badge');
+                        if (badge) badge.remove();
+                        
+                        // Show quantity controls
+                        const qtyEl = itemEl.querySelector('.qty');
+                        if (qtyEl) qtyEl.style.display = 'flex';
+                        
+                        // Enable image click
+                        const imageIcon = itemEl.querySelector('.image-icon');
+                        if (imageIcon) {
+                            imageIcon.style.cursor = 'pointer';
+                            imageIcon.style.opacity = '1';
+                            imageIcon.onclick = function() { showImageModal(itemName); };
+                        }
+                    }
+                    
+                    break;
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error("Error refreshing availability:", error);
+    }
+}
+
+// Refresh availability every 10 seconds
+setInterval(refreshAvailability, 10000);
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') previousPage();
+    if (e.key === 'ArrowRight') nextPage();
+});
+</script>
+
+{% endblock %}

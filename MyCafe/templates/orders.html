@@ -1,0 +1,632 @@
+<!-- IMPROVED orders.html - Replace your current orders.html with this -->
+{% extends "base.html" %}
+{% block content %}
+
+<div class="orders-page">
+    <div class="page-header">
+        <h1>📋 Your Order History</h1>
+        <p class="page-subtitle">Track all your premium dining experiences</p>
+    </div>
+
+    {% if grouped_orders %}
+    <div class="orders-container" id="ordersContainer">
+        {% for cafe, orders in grouped_orders.items() %}
+        <div class="cafe-section">
+            <div class="cafe-header">
+                <div class="cafe-icon">☕</div>
+                <div class="cafe-info">
+                    <h2>{{ cafe }}</h2>
+                    <p class="order-count">{{ orders|length }} order{{ 's' if orders|length > 1 else '' }}</p>
+                </div>
+                <div class="cafe-total">
+                    Total: ₹{{ orders|sum(attribute='total') }}
+                </div>
+            </div>
+
+            <div class="orders-grid">
+                {% for o in orders %}
+                <div class="premium-order-card" data-order-id="{{ o.id }}">
+                    <div class="order-header">
+                        <div>
+                            <span class="order-id">#{{ o.id }}</span>
+                            {% if o.get('table_id') %}
+                            <span class="table-badge">{{ o.table_id }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="order-date">{{ o.get("created_at", "N/A") }}</span>
+                    </div>
+
+                    <div class="order-items">
+                        {% set items_list = o.get("items", "").split('\n') %}
+                        {% for item in items_list %}
+                        {% if item.strip() %}
+                        <div class="order-item">
+                            <span class="item-name">{{ item.split(' x ')[0] if ' x ' in item else item }}</span>
+                            <span class="item-qty">
+                                {{ item.split(' x ')[1] if ' x ' in item else '1' }}x
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="order-footer">
+                        <div class="order-status">
+                            <span class="status-dot {{ o.status }}"></span>
+                            <span class="status-text">{{ o.status | capitalize }}</span>
+                        </div>
+                        <div class="order-total">
+                            ₹{{ o.get("total", 0) }}
+                            <button class="view-bill-btn" onclick="viewBill({{ o.id }})">
+                                <i class="fas fa-receipt"></i> Bill
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Edit/Cancel Actions -->
+                    {% if o.status == 'pending' and not o.locked %}
+                    <div class="order-actions">
+                        <button class="btn-small edit-btn" onclick="editOrder({{ o.id }})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-small cancel-btn" onclick="cancelOrder({{ o.id }})">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="orders-summary">
+        <div class="summary-card">
+            <h3>📊 Order Summary</h3>
+            <div class="summary-stats">
+                <div class="stat">
+                    <span class="stat-label">Total Orders</span>
+                    <span class="stat-value">
+                        {% set total_orders = 0 %}
+                        {% for orders_list in grouped_orders.values() %}
+                        {% set total_orders = total_orders + orders_list|length %}
+                        {% endfor %}
+                        {{ total_orders }}
+                    </span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Cafes Visited</span>
+                    <span class="stat-value">{{ grouped_orders|length }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Total Spent</span>
+                    <span class="stat-value">
+                        {% set total_spent = 0 %}
+                        {% for orders_list in grouped_orders.values() %}
+                        {% for order in orders_list %}
+                        {% set total_spent = total_spent + order.get("total", 0) %}
+                        {% endfor %}
+                        {% endfor %}
+                        ₹{{ total_spent }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-orders">
+        <div class="empty-icon">🍽️</div>
+        <h3>No Orders Yet</h3>
+        <p>Your premium dining journey begins here!</p>
+        <a href="/start" class="btn">Start Your First Order</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    /* BEAUTIFUL ORDER HISTORY CSS */
+    .orders-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        animation: fadeIn 0.6s ease;
+    }
+
+    .page-header {
+        text-align: center;
+        padding: 2.5rem 2rem;
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, rgba(225, 112, 85, 0.08), rgba(129, 199, 132, 0.08));
+        border-radius: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+    }
+
+    .page-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+    }
+
+    .cafe-section {
+        margin-bottom: 3rem;
+    }
+
+    .cafe-header {
+        background: var(--card-light);
+        padding: 1.75rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 2px solid rgba(225, 112, 85, 0.1);
+    }
+
+    .cafe-icon {
+        font-size: 2.5rem;
+        margin-right: 1rem;
+    }
+
+    .cafe-info h2 {
+        font-size: 1.75rem;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        font-weight: 700;
+    }
+
+    .order-count {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .cafe-total {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .orders-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .premium-order-card {
+        background: var(--card-light);
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        border: 2px solid transparent;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-order-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--primary), var(--accent));
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .premium-order-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 28px rgba(225, 112, 85, 0.2);
+        border-color: rgba(225, 112, 85, 0.3);
+    }
+
+    .premium-order-card:hover::before {
+        opacity: 1;
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.25rem;
+        border-bottom: 2px solid rgba(225, 112, 85, 0.1);
+        margin-bottom: 1.25rem;
+    }
+
+    .order-id {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+    .order-date {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .table-badge {
+        background: linear-gradient(135deg, rgba(129, 199, 132, 0.15), rgba(129, 199, 132, 0.25));
+        color: #2e7d32;
+        padding: 0.3rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 0.75rem;
+        border: 1px solid rgba(129, 199, 132, 0.3);
+    }
+
+    .order-items {
+        margin: 1.25rem 0;
+        max-height: 220px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .order-items::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .order-items::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 3px;
+    }
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 0;
+        border-bottom: 1px dashed rgba(225, 112, 85, 0.15);
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 1rem;
+    }
+
+    .item-qty {
+        background: linear-gradient(135deg, rgba(225, 112, 85, 0.15), rgba(246, 185, 59, 0.15));
+        color: var(--primary);
+        padding: 0.35rem 0.85rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: 1px solid rgba(225, 112, 85, 0.2);
+    }
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.25rem;
+        margin-top: 1.25rem;
+        border-top: 2px solid rgba(225, 112, 85, 0.1);
+    }
+
+    .order-status {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .status-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.6;
+        }
+    }
+
+    .status-dot.pending {
+        background: #f39c12;
+        box-shadow: 0 0 10px rgba(243, 156, 18, 0.4);
+    }
+
+    .status-dot.preparing {
+        background: #3498db;
+        box-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
+    }
+
+    .status-dot.ready {
+        background: #2ecc71;
+        box-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+    }
+
+    .status-dot.completed {
+        background: #95a5a6;
+    }
+
+    .status-dot.cancelled {
+        background: #e74c3c;
+    }
+
+    .status-text {
+        font-weight: 700;
+        text-transform: capitalize;
+        font-size: 1rem;
+    }
+
+    .order-total {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .view-bill-btn {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: white;
+        border: none;
+        padding: 0.6rem 1.35rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(225, 112, 85, 0.25);
+    }
+
+    .view-bill-btn:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 20px rgba(225, 112, 85, 0.4);
+    }
+
+    .view-bill-btn:active {
+        transform: scale(0.98);
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px dashed rgba(225, 112, 85, 0.15);
+    }
+
+    .btn-small {
+        flex: 1;
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .edit-btn {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.2));
+        color: #2980b9;
+        border: 2px solid rgba(52, 152, 219, 0.3);
+    }
+
+    .edit-btn:hover {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(52, 152, 219, 0.3));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.25);
+    }
+
+    .cancel-btn {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.2));
+        color: #c0392b;
+        border: 2px solid rgba(231, 76, 60, 0.3);
+    }
+
+    .cancel-btn:hover {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(231, 76, 60, 0.3));
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25);
+    }
+
+    .empty-orders {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: var(--card-light);
+        border-radius: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.6;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    .empty-orders h3 {
+        font-size: 2rem;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .empty-orders p {
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    .orders-summary {
+        margin-top: 3rem;
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, rgba(225, 112, 85, 0.05), rgba(129, 199, 132, 0.05));
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .summary-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+    .stat-label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    @media (max-width: 768px) {
+        .orders-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cafe-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .cafe-icon {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .order-total {
+            font-size: 1.5rem;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .summary-stats {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    function viewBill(orderId) {
+        window.location.href = `/bill/${orderId}`;
+    }
+
+    function editOrder(orderId) {
+        // Get order details
+        fetch(`/api/order/${orderId}/edit-window`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.can_edit) {
+                    alert('❌ Edit window expired! Orders can only be edited within 15 minutes.');
+                    return;
+                }
+
+                const newItems = prompt('Edit order items (one per line, format: "Item x Quantity"):\n\nExample:\nMargherita x 2\nCold Coffee x 1');
+
+                if (!newItems) return;
+
+                fetch(`/api/order/${orderId}/edit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: newItems })
+                })
+                    .then(r => r.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert(`✅ Order #${orderId} updated! New total: ₹${result.new_total}`);
+                            location.reload();
+                        } else {
+                            alert('❌ ' + result.error);
+                        }
+                    });
+            });
+    }
+
+    function cancelOrder(orderId) {
+        if (confirm(`Cancel order #${orderId}?`)) {
+            fetch(`/api/order/${orderId}/cancel`, {
+                method: 'POST'
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    alert('Order cancelled!');
+                    location.reload();
+                } else {
+                    alert('Failed: ' + data.error);
+                }
+            });
+        }
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,98 @@
+<!-- File: templates/privacy.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="legal-page">
+    <h1>Privacy Policy</h1>
+    
+    <div class="legal-content">
+        <p><strong>Last Updated:</strong> February 2024</p>
+        
+        <h2>1. Information We Collect</h2>
+        <p>When you use MY CAFE, we collect:</p>
+        <ul>
+            <li>Order details (items, quantities, total amount)</li>
+            <li>Table number (for dine-in orders)</li>
+            <li>Contact information (if you create an account)</li>
+            <li>Payment status (but not payment details)</li>
+        </ul>
+        
+        <h2>2. How We Use Your Information</h2>
+        <p>Your data is used only for:</p>
+        <ul>
+            <li>Processing your food orders</li>
+            <li>Improving our service</li>
+            <li>Contacting you about your order status</li>
+            <li>Generating bills for accounting</li>
+        </ul>
+        
+        <h2>3. Data Security</h2>
+        <p>We implement industry-standard security measures:</p>
+        <ul>
+            <li>Encrypted data transmission</li>
+            <li>Secure database storage</li>
+            <li>Regular security audits</li>
+            <li>Limited employee access</li>
+        </ul>
+        
+        <h2>4. Data Retention</h2>
+        <p>We retain order data for 2 years for accounting purposes, after which it is securely deleted.</p>
+        
+        <h2>5. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Access your personal data</li>
+            <li>Request correction of inaccurate data</li>
+            <li>Request deletion of your data</li>
+            <li>Opt-out of marketing communications</li>
+        </ul>
+        
+        <h2>6. Contact Us</h2>
+        <p>For privacy concerns, contact: <strong>privacy@mycafe.com</strong></p>
+    </div>
+</div>
+
+<style>
+.legal-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--card-light);
+    border-radius: 12px;
+    margin-top: 2rem;
+}
+
+.legal-page h1 {
+    color: var(--primary);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.legal-content {
+    padding: 2rem;
+    background: var(--card-light);  /* ✅ CHANGED */
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.legal-content h2 {
+    color: var(--text-dark);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.legal-content p, .legal-content li {
+    color: var(--text-dark);  /* ✅ CHANGED */
+    line-height: 1.6;
+}
+
+.legal-content ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.legal-content li {
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}

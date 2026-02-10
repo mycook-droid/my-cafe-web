@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up | MY CAFE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="auth-body">
+
+    <div class="back-home">
+        <a href="/">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+    </div>
+
+    <div class="auth-card signup-card">
+        <h1>Join MY CAFE</h1>
+        <p class="subtitle">Create your account for premium dining experiences</p>
+
+        <form method="POST" action="/signup" id="signupForm">
+            <input type="text" name="username" placeholder="Choose a username" required>
+
+            <div class="input-group">
+                <input type="password" name="password" id="password" placeholder="Create a strong password" required>
+                <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <div class="password-strength">
+                <div class="strength-bar" id="strengthBar"></div>
+            </div>
+
+            <input type="text" name="name" placeholder="Full name" required>
+            <input type="email" name="email" placeholder="Email address" required>
+            <input type="text" name="phone" placeholder="Phone number" required>
+
+            <button type="submit">
+                <span>Create Premium Account</span>
+            </button>
+        </form>
+
+        <div class="divider">ALREADY HAVE AN ACCOUNT?</div>
+
+        <p class="small-text">
+            Ready to dine?
+            <a href="/login">Login to your account</a>
+        </p>
+
+        <p class="terms">
+            By creating an account, you agree to our
+            <a href="#">Terms of Service</a> and
+            <a href="#">Privacy Policy</a>
+        </p>
+    </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const toggleIcon = document.querySelector(`#${fieldId} + .password-toggle i`);
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        document.getElementById('password').addEventListener('input', function (e) {
+            const password = e.target.value;
+            const strengthBar = document.getElementById('strengthBar');
+            let strength = 0;
+
+            if (password.length >= 8) strength += 25;
+            if (/[A-Z]/.test(password)) strength += 25;
+            if (/[0-9]/.test(password)) strength += 25;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+
+            strengthBar.style.width = strength + '%';
+            strengthBar.style.background = strength >= 75 ? 'linear-gradient(135deg, #10b981, #34d399)' :
+                strength >= 50 ? 'linear-gradient(135deg, #f59e0b, #fbbf24)' :
+                    'linear-gradient(135deg, #ef4444, #f87171)';
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function (e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+        });
+    </script>
+</body>
+
+</html>

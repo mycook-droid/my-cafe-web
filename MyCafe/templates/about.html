@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="about-page">
+    <div class="about-header">
+        <h1>🍽️ About MY CAFE</h1>
+        <p class="subtitle">Modern dining experience meets technology</p>
+    </div>
+
+    <div class="about-content">
+        <section class="about-section">
+            <h2>What is MY CAFE?</h2>
+            <p>MY CAFE is a complete restaurant management system featuring QR-code based ordering, real-time kitchen display, and automated billing. Designed to streamline operations and enhance customer experience.</p>
+        </section>
+
+        <section class="about-section">
+            <h2>Features</h2>
+            <ul>
+                <li>📱 QR Code Table Ordering</li>
+                <li>🍕 Real-time Menu Management</li>
+                <li>👨‍🍳 Kitchen Display System</li>
+                <li>💰 Automated Billing with GST</li>
+                <li>📊 Analytics Dashboard</li>
+                <li>🌓 Dark Mode Support</li>
+            </ul>
+        </section>
+
+        <section class="about-section creator-section">
+            <h2>Creator</h2>
+            <div class="creator-card">
+                <div class="creator-info">
+                    <h3>Zishan Ali</h3>
+                    <p class="creator-title">Full-Stack Developer</p>
+                    <p class="creator-bio">
+                        Building innovative solutions with Python, Flask, and modern web technologies. 
+                        This is my first major full-stack project - a complete restaurant management system.
+                    </p>
+                    <div class="creator-links">
+                        <a href="https://mycook-droid.github.io/Zishan_droid/" target="_blank" class="creator-link">
+                            <i class="fas fa-globe"></i> Portfolio
+                        </a>
+                        <a href="https://github.com/mycook-droid" target="_blank" class="creator-link">
+                            <i class="fab fa-github"></i> GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section tech-stack">
+            <h2>Tech Stack</h2>
+            <div class="tech-badges">
+                <span class="tech-badge">Python</span>
+                <span class="tech-badge">Flask</span>
+                <span class="tech-badge">SQLite</span>
+                <span class="tech-badge">JavaScript</span>
+                <span class="tech-badge">HTML/CSS</span>
+                <span class="tech-badge">QR Codes</span>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+.about-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.about-header h1 {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.about-section {
+    background: var(--card-light);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.about-section h2 {
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.about-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.about-section li {
+    padding: 0.5rem 0;
+    color: var(--text-dark);
+    font-size: 1.05rem;
+}
+
+.creator-card {
+    background: linear-gradient(135deg, rgba(225, 112, 85, 0.05), rgba(129, 199, 132, 0.05));
+    padding: 2rem;
+    border-radius: 12px;
+    border: 2px solid rgba(225, 112, 85, 0.1);
+}
+
+.creator-info h3 {
+    font-size: 1.75rem;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.creator-title {
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.creator-bio {
+    color: var(--text-dark);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.creator-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.creator-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.creator-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225, 112, 85, 0.3);
+}
+
+.tech-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.tech-badge {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+</style>
+
+{% endblock %}
