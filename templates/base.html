@@ -21,36 +21,43 @@
 
 <body>
     <!-- Modern Navbar -->
+    <!-- Modern Navbar (UPDATED STRUCTURE) -->
     <nav class="navbar">
-        <div class="navbar-brand">
-            <h2><a href="/">MY CAFE</a></h2>
+
+        <!-- LEFT: Logo -->
+        <div class="nav-left">
+            <h2 class="logo">
+                <a href="/">MY CAFE</a>
+            </h2>
+        </div>
+
+        <!-- CENTER: CART (Always Visible on Mobile) -->
+        <div class="nav-center">
+            <a href="javascript:void(0)" onclick="toggleCart()" class="cart-icon-visible" title="Cart">
+                <img src="/static/icons/Cart.png" alt="Cart">
+            </a>
+        </div>
+
+        <!-- RIGHT: Three Dots Menu -->
+        <div class="nav-right">
             <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                <i class="fas fa-bars"></i>
+                <i class="fas fa-ellipsis-v"></i>
             </button>
         </div>
 
+        <!-- Hidden Menu (Opens on 3 dots click) -->
         <ul class="nav-links" id="navLinks">
             <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="/start"><i class="fas fa-utensils"></i> New Order</a></li>
-            <li>
-                <a href="javascript:void(0)" onclick="toggleCart()" class="bill-icon" title="Cart">
-                    <img src="/static/icons/Cart.png" alt="Cart">
-                </a>
-            </li>
             <li><a href="/orders"><i class="fas fa-receipt"></i> History</a></li>
-
-            <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li> <!-- ✅ ADD THIS -->
-
+            <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
 
             {% if session.get("user") %}
-            <!-- Show "Become Admin" for non-admin users -->
             {% if not session.get("is_admin") %}
-            <li><a href="/become-admin" class="admin-link"><i class="fas fa-crown"></i> Become Admin</a></li>
+            <li><a href="/become-admin"><i class="fas fa-crown"></i> Become Admin</a></li>
             {% else %}
-            <!-- Show Admin Dashboard for admin users -->
-            <li><a href="/admin" class="admin-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
             {% endif %}
-
             <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             {% else %}
             <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
@@ -58,14 +65,8 @@
             {% endif %}
         </ul>
 
-        <!-- Theme Toggle -->
-        <div class="theme-switch-wrapper">
-            <label class="theme-switch" for="themeToggle">
-                <input type="checkbox" id="themeToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
     </nav>
+
 
     <!-- Main Content -->
     <main class="main-container">
@@ -287,7 +288,8 @@
                 {% endif %}
 
                 const totalItems = Object.values(cartData).reduce((sum, qty) => sum + qty, 0);
-                const badge = document.querySelector('.bill-icon');
+                const badge = document.querySelector('.cart-icon-visible');
+
 
                 if (badge && totalItems > 0) {
                     badge.setAttribute('data-count', totalItems);
