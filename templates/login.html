@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sign Up | MY CAFE</title>
+    <title>Login | MY CAFE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -17,46 +17,50 @@
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            padding: 1rem;
             position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* Animated background circles */
+        /* Animated background elements */
         body::before,
         body::after {
             content: '';
             position: absolute;
             border-radius: 50%;
-            opacity: 0.12;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
         }
 
         body::before {
-            width: 500px;
-            height: 500px;
+            width: 400px;
+            height: 400px;
             background: white;
-            top: -150px;
-            right: -100px;
-            animation: rotate 30s linear infinite;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
         }
 
         body::after {
-            width: 350px;
-            height: 350px;
+            width: 300px;
+            height: 300px;
             background: white;
-            bottom: -100px;
-            left: -80px;
-            animation: rotate 40s linear infinite reverse;
+            bottom: -80px;
+            right: -80px;
+            animation-delay: -10s;
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.1); }
-            to { transform: rotate(360deg) scale(1); }
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-50px) rotate(180deg);
+            }
         }
 
         /* Back button */
@@ -87,66 +91,60 @@
             transform: translateX(-5px);
         }
 
-        /* Signup container */
-        .signup-container {
+        /* Login container */
+        .login-container {
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 500px;
+            max-width: 440px;
         }
 
-        .signup-card {
+        .login-card {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 3rem 2.75rem;
-            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
-            animation: zoomIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease;
         }
 
-        @keyframes zoomIn {
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: scale(0.9);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+                transform: translateY(0);
             }
         }
 
-        /* Brand section */
+        /* Logo/Brand */
         .brand {
             text-align: center;
             margin-bottom: 2.5rem;
         }
 
         .brand-icon {
-            width: 75px;
-            height: 75px;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            border-radius: 22px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 1rem;
-            box-shadow: 0 12px 35px rgba(245, 87, 108, 0.4);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
         .brand-icon i {
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: white;
         }
 
         .brand h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
             color: #2d3748;
             margin-bottom: 0.5rem;
@@ -158,25 +156,40 @@
             font-size: 0.95rem;
         }
 
-        /* Form */
-        .signup-form {
+        /* Messages */
+        .success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
             display: flex;
-            flex-direction: column;
-            gap: 1.15rem;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideDown 0.3s ease;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
         }
 
         .form-group {
             position: relative;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
         }
 
         .form-group label {
@@ -189,12 +202,12 @@
 
         .form-group input {
             width: 100%;
-            padding: 0.95rem 1.15rem;
+            padding: 1rem 1.25rem;
             padding-left: 3rem;
             background: #f7fafc;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #2d3748;
             transition: all 0.3s ease;
             outline: none;
@@ -202,8 +215,8 @@
 
         .form-group input:focus {
             background: white;
-            border-color: #f093fb;
-            box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.12);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .form-group input::placeholder {
@@ -214,54 +227,22 @@
         .input-icon {
             position: absolute;
             left: 1rem;
-            bottom: 0.95rem;
+            bottom: 1rem;
             color: #a0aec0;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             pointer-events: none;
             transition: color 0.3s ease;
         }
 
         .form-group input:focus ~ .input-icon {
-            color: #f093fb;
-        }
-
-        /* Password strength indicator */
-        .password-strength {
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-
-        .strength-bar {
-            height: 100%;
-            width: 0%;
-            border-radius: 4px;
-            transition: all 0.4s ease;
-            background: #e53e3e;
-        }
-
-        .strength-bar.weak {
-            width: 33%;
-            background: linear-gradient(135deg, #fc8181, #e53e3e);
-        }
-
-        .strength-bar.medium {
-            width: 66%;
-            background: linear-gradient(135deg, #f6ad55, #ed8936);
-        }
-
-        .strength-bar.strong {
-            width: 100%;
-            background: linear-gradient(135deg, #68d391, #38a169);
+            color: #667eea;
         }
 
         /* Submit button */
         .submit-btn {
             width: 100%;
-            padding: 1.05rem 1.5rem;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
             border-radius: 12px;
@@ -269,8 +250,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 0.75rem;
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.35);
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
             position: relative;
             overflow: hidden;
         }
@@ -278,33 +259,25 @@
         .submit-btn::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
         }
 
         .submit-btn:hover::before {
-            width: 300px;
-            height: 300px;
+            left: 100%;
         }
 
         .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
         }
 
         .submit-btn:active {
-            transform: translateY(-1px);
-        }
-
-        .submit-btn span {
-            position: relative;
-            z-index: 1;
+            transform: translateY(0);
         }
 
         .submit-btn:disabled {
@@ -316,10 +289,10 @@
         .divider {
             display: flex;
             align-items: center;
-            margin: 1.5rem 0;
+            margin: 1.75rem 0;
             color: #a0aec0;
-            font-size: 0.8rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
         .divider::before,
@@ -338,43 +311,27 @@
             margin-left: 1rem;
         }
 
-        /* Footer */
+        /* Footer links */
         .footer-links {
             text-align: center;
         }
 
         .footer-links p {
             color: #718096;
-            font-size: 0.925rem;
-            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
         }
 
         .footer-links a {
-            color: #f5576c;
+            color: #667eea;
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
         }
 
         .footer-links a:hover {
-            color: #f093fb;
+            color: #764ba2;
             text-decoration: underline;
-        }
-
-        .terms {
-            font-size: 0.8rem;
-            color: #a0aec0;
-            margin-top: 1.25rem;
-            line-height: 1.6;
-        }
-
-        .terms a {
-            color: #718096;
-            text-decoration: underline;
-        }
-
-        .terms a:hover {
-            color: #f5576c;
         }
 
         /* Loading state */
@@ -385,13 +342,12 @@
         .submit-btn.loading::after {
             content: '';
             position: absolute;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            z-index: 2;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
@@ -405,39 +361,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             body {
-                padding: 1.25rem;
-            }
-
-            .signup-card {
-                padding: 2.5rem 2rem;
-            }
-
-            .brand h1 {
-                font-size: 1.9rem;
-            }
-
-            .brand-icon {
-                width: 65px;
-                height: 65px;
-            }
-
-            .brand-icon i {
-                font-size: 1.9rem;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-
-            .form-group {
-                grid-column: 1 / -1;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 1rem;
+                padding: 1rem 0.75rem;
             }
 
             .back-home {
@@ -445,13 +369,12 @@
                 left: 1rem;
             }
 
-            .signup-card {
-                padding: 2rem 1.5rem;
-                border-radius: 22px;
+            .login-card {
+                padding: 2.5rem 2rem;
             }
 
             .brand h1 {
-                font-size: 1.65rem;
+                font-size: 1.75rem;
             }
 
             .brand-icon {
@@ -460,33 +383,49 @@
             }
 
             .brand-icon i {
-                font-size: 1.65rem;
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+                border-radius: 20px;
+            }
+
+            .brand h1 {
+                font-size: 1.5rem;
+            }
+
+            .brand-icon {
+                width: 55px;
+                height: 55px;
+            }
+
+            .brand-icon i {
+                font-size: 1.5rem;
             }
 
             .form-group input {
-                padding: 0.85rem 1rem;
-                padding-left: 2.65rem;
-                font-size: 0.9rem;
-            }
-
-            .input-icon {
-                left: 0.85rem;
-                bottom: 0.85rem;
+                padding: 0.875rem 1rem;
+                padding-left: 2.75rem;
                 font-size: 0.95rem;
             }
 
+            .input-icon {
+                left: 0.875rem;
+                bottom: 0.875rem;
+                font-size: 1rem;
+            }
+
             .submit-btn {
-                padding: 0.95rem 1.25rem;
+                padding: 0.875rem 1.25rem;
                 font-size: 0.95rem;
             }
 
             .back-home a {
                 padding: 0.625rem 1rem;
                 font-size: 0.9rem;
-            }
-
-            .terms {
-                font-size: 0.75rem;
             }
         }
     </style>
@@ -500,147 +439,71 @@
         </a>
     </div>
 
-    <div class="signup-container">
-        <div class="signup-card">
+    <div class="login-container">
+        <div class="login-card">
             <div class="brand">
                 <div class="brand-icon">
-                    <i class="fas fa-coffee"></i>
+                    <i class="fas fa-utensils"></i>
                 </div>
-                <h1>Join MY CAFE</h1>
-                <p>Create your account and start your culinary adventure</p>
+                <h1>Welcome Back</h1>
+                <p>Sign in to continue your culinary journey</p>
             </div>
 
-            <form method="POST" action="/signup" class="signup-form" id="signupForm">
-                <div class="form-group full-width">
+            {% if message %}
+            <div class="success">
+                <i class="fas fa-check-circle"></i>
+                {{ message }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login" class="login-form" id="loginForm">
+                <div class="form-group">
                     <label for="username">Username</label>
                     <input 
                         type="text" 
                         name="username" 
                         id="username"
-                        placeholder="Choose a unique username" 
+                        placeholder="Enter your username" 
                         required
                         autocomplete="username"
                     >
-                    <i class="fas fa-user-circle input-icon"></i>
+                    <i class="fas fa-user input-icon"></i>
                 </div>
 
-                <div class="form-group full-width">
+                <div class="form-group">
                     <label for="password">Password</label>
                     <input 
                         type="password" 
                         name="password" 
                         id="password"
-                        placeholder="Create a strong password" 
+                        placeholder="Enter your password" 
                         required
-                        autocomplete="new-password"
+                        autocomplete="current-password"
                     >
-                    <i class="fas fa-key input-icon"></i>
-                    <div class="password-strength">
-                        <div class="strength-bar" id="strengthBar"></div>
-                    </div>
-                </div>
-
-                <div class="form-group full-width">
-                    <label for="name">Full Name</label>
-                    <input 
-                        type="text" 
-                        name="name" 
-                        id="name"
-                        placeholder="Enter your full name" 
-                        required
-                        autocomplete="name"
-                    >
-                    <i class="fas fa-id-card input-icon"></i>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            id="email"
-                            placeholder="your@email.com" 
-                            required
-                            autocomplete="email"
-                        >
-                        <i class="fas fa-envelope input-icon"></i>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input 
-                            type="tel" 
-                            name="phone" 
-                            id="phone"
-                            placeholder="Your phone number" 
-                            required
-                            autocomplete="tel"
-                        >
-                        <i class="fas fa-phone input-icon"></i>
-                    </div>
+                    <i class="fas fa-lock input-icon"></i>
                 </div>
 
                 <button type="submit" class="submit-btn">
-                    <span>Create My Account</span>
+                    <span>Sign In to MY CAFE</span>
                 </button>
             </form>
 
-            <div class="divider">ALREADY HAVE AN ACCOUNT?</div>
+            <div class="divider">OR</div>
 
             <div class="footer-links">
                 <p>
-                    Ready to dine?
-                    <a href="/login">Sign in here</a>
-                </p>
-
-                <p class="terms">
-                    By creating an account, you agree to our
-                    <a href="/terms">Terms of Service</a> and
-                    <a href="/privacy">Privacy Policy</a>
+                    New to MY CAFE?
+                    <a href="/signup">Create an account</a>
                 </p>
             </div>
         </div>
     </div>
 
     <script>
-        const signupForm = document.getElementById('signupForm');
-        const passwordInput = document.getElementById('password');
-        const strengthBar = document.getElementById('strengthBar');
-        const submitBtn = signupForm.querySelector('.submit-btn');
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = loginForm.querySelector('.submit-btn');
 
-        // Password strength checker
-        passwordInput.addEventListener('input', function(e) {
-            const password = e.target.value;
-            let strength = 0;
-
-            // Reset classes
-            strengthBar.className = 'strength-bar';
-
-            if (password.length === 0) {
-                return;
-            }
-
-            // Check criteria
-            if (password.length >= 8) strength++;
-            if (password.length >= 12) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[a-z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-            // Set strength class
-            if (strength <= 2) {
-                strengthBar.classList.add('weak');
-            } else if (strength <= 4) {
-                strengthBar.classList.add('medium');
-            } else {
-                strengthBar.classList.add('strong');
-            }
-        });
-
-        // Form submission
-        signupForm.addEventListener('submit', function(e) {
+        loginForm.addEventListener('submit', function(e) {
             submitBtn.disabled = true;
             submitBtn.classList.add('loading');
         });
