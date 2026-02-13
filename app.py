@@ -8,10 +8,13 @@ import qr_generator
 import db, os, json
 import random
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24).hex())
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    raise ValueError("❌ SECRET_KEY not found! Create .env file!")app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)
 
 # Initialize database on startup
 db.init_db()
@@ -19,8 +22,9 @@ db.init_db()
 # =========================
 # CONFIGURATION
 # =========================
-ADMIN_CODE = "MYCAFE2024"
-EDIT_WINDOW_MINUTES = 15
+ADMIN_CODE = os.environ.get("ADMIN_CODE")
+if not ADMIN_CODE:
+    raise ValueError("❌ ADMIN_CODE not found! Add to .env file!")    EDIT_WINDOW_MINUTES = 15
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge
