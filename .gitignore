@@ -1,0 +1,81 @@
+# =====================================
+# MY CAFE - Security .gitignore
+# =====================================
+
+# CRITICAL: Environment variables & secrets
+.env
+.env.local
+.env.production
+*.env
+config.py
+secrets.py
+
+# CRITICAL: Database files (NEVER push to GitHub!)
+*.db
+*.sqlite
+*.sqlite3
+order.db
+instance/
+
+# CRITICAL: Session & cache
+flask_session/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# QR Codes (regenerate on server)
+static/qr_codes/*.png
+!static/qr_codes/.gitkeep
+
+# Uploaded user content
+static/uploads/
+static/menu_images/*.jpg
+static/menu_images/*.png
+!static/menu_images/.gitkeep
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+*.pid
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Deployment
+*.pem
+*.key
+*.cert
+.render/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.backup
+
+# OS files
+Thumbs.db
+Desktop.ini
