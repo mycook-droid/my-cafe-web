@@ -787,7 +787,10 @@ def admin_orders():
             order['status'] = 'pending'
 
         order['bill'] = db.get_bill(order['id'])
-        order['items_list'] = parse_order_items(order.get('items', '')
+        if isinstance(items_string, str):
+            order['items_list'] = parse_order_items(items_string)
+        else:
+            order['items_list'] = []
         orders_with_users.append(order)
 
     return render_template("admin/kitchen.html", orders=orders_with_users)
