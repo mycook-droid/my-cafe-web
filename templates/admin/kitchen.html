@@ -379,38 +379,19 @@
             </div>
 
             <div class="items-list">
-                {% if order.get('items') %}
-                {% set items_text = order.items | string %}
-                {% if '\n' in items_text %}
-                {% for item in items_text.split('\n') %}
-                {% if item and item.strip() %}
-                {% set item_parts = item.split(' x ') %}
-                <div class="item">
-                    <span class="item-name">{{ item_parts[0].strip() }}</span>
-                    <span class="item-qty">
-                        {% if item_parts | length > 1 %}
-                        {{ item_parts[1].strip() }}x
-                        {% else %}
-                        1x
-                        {% endif %}
-                    </span>
-                </div>
-                {% endif %}
-                {% endfor %}
-                {% else %}
-                <!-- Single item without newline -->
-                <div class="item">
-                    <span class="item-name">{{ items_text }}</span>
-                    <span class="item-qty">1x</span>
-                </div>
-                {% endif %}
-                {% else %}
-                <div class="item" style="color: #d4b483; font-style: italic;">
-                    <span>No items in this order</span>
-                </div>
-                {% endif %}
-            </div>
-
+    {% if order.items_list and order.items_list | length > 0 %}
+        {% for item in order.items_list %}
+        <div class="item">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-qty">{{ item.quantity }}x</span>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="item" style="color: #d4b483; font-style: italic;">
+            <span>No items in this order</span>
+        </div>
+    {% endif %}
+</div>
             <div class="order-total">₹{{ order.total }}</div>
 
             <div class="status-actions">
