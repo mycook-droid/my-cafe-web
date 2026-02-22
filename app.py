@@ -12,9 +12,12 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY")
-if not app.secret_key:
-    raise ValueError("Set SECRET_KEY in .env!")
+
+# Render/production may not provide a local .env file, so use safe fallbacks.
+# You should still set both variables in your hosting dashboard.
+app.secret_key = os.environ.get("SECRET_KEY") or "dev-secret-key-change-me"
+if app.secret_key == "dev-secret-key-change-me":
+    print("⚠️ SECRET_KEY not set. Using development fallback key.")
 
 # Initialize database on startup
 db.init_db()
@@ -22,9 +25,9 @@ db.init_db()
 # =========================
 # CONFIGURATION
 # =========================
-ADMIN_CODE = os.environ.get("ADMIN_CODE")
-if not ADMIN_CODE:
-    raise ValueError("Set ADMIN_CODE in .env!")
+ADMIN_CODE = os.environ.get("ADMIN_CODE") or "MYCAFE2024"
+if ADMIN_CODE == "MYCAFE2024":
+    print("⚠️ ADMIN_CODE not set. Using fallback admin code.")
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge

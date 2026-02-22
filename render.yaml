@@ -7,5 +7,7 @@ services:
     envVars:
       - key: SECRET_KEY
         generateValue: true
+      - key: ADMIN_CODE
+        value: MYCAFE2024
       - key: PYTHON_VERSION
         value: 3.11.0
