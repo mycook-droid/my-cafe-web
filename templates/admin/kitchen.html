@@ -355,10 +355,10 @@
     </div>
 
     <div class="filters">
-        <button class="filter-btn active" onclick="filterOrders('all')">All Orders</button>
-        <button class="filter-btn" onclick="filterOrders('pending')">Pending</button>
-        <button class="filter-btn" onclick="filterOrders('preparing')">Preparing</button>
-        <button class="filter-btn" onclick="filterOrders('ready')">Ready</button>
+        <button class="filter-btn active" onclick="filterOrders('all', this)">All Orders</button>
+        <button class="filter-btn" onclick="filterOrders('pending', this)">Pending</button>
+        <button class="filter-btn" onclick="filterOrders('preparing', this)">Preparing</button>
+        <button class="filter-btn" onclick="filterOrders('ready', this)">Ready</button>
     </div>
 
     <div class="orders-grid" id="ordersGrid">
@@ -396,15 +396,15 @@
 
             <div class="status-actions">
                 {% if order.status == 'pending' or not order.status %}
-                <button class="status-btn btn-preparing" onclick="updateStatus({{ order.id }}, 'preparing')">
+                <button class="status-btn btn-preparing" onclick="updateStatus({{ order.id }}, 'preparing', this)">
                     👨‍🍳 Start Preparing
                 </button>
                 {% elif order.status == 'preparing' %}
-                <button class="status-btn btn-ready" onclick="updateStatus({{ order.id }}, 'ready')">
+                <button class="status-btn btn-ready" onclick="updateStatus({{ order.id }}, 'ready', this)">
                     ✅ Mark as Ready
                 </button>
                 {% elif order.status == 'ready' %}
-                <button class="status-btn btn-complete" onclick="updateStatus({{ order.id }}, 'completed')">
+                <button class="status-btn btn-complete" onclick="updateStatus({{ order.id }}, 'completed', this)">
                     ✓ Complete Order
                 </button>
                 {% endif %}
@@ -423,8 +423,7 @@
 
     <script>
         // Update order status
-        async function updateStatus(orderId, status) {
-            const button = event.target;
+        async function updateStatus(orderId, status, button) {
             const originalText = button.innerHTML;
 
             // Show loading state
@@ -512,13 +511,13 @@
 `;
         document.head.appendChild(style);
         // Filter orders by status
-        function filterOrders(status) {
+        function filterOrders(status, button) {
             const cards = document.querySelectorAll('.order-card');
             const buttons = document.querySelectorAll('.filter-btn');
 
             // Update active button
             buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            button.classList.add('active');
 
             // Show/hide cards
             cards.forEach(card => {
