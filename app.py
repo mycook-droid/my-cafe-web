@@ -1288,27 +1288,27 @@ def update_order_status(order_id):
         return jsonify({'success': False, 'error': 'Invalid status'})
 
     try:
-    # Update status in database
-    conn = db.db_connection()  # ✅ Use helper function!
-    cur = conn.cursor()
-    cur.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
+        # Update status in database
+        conn = db.db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
 
-    # If status is 'preparing', lock the order
-    if status == 'preparing':
-        cur.execute("""
-            INSERT OR IGNORE INTO order_locks (order_id, lock_reason, locked_by)
-            VALUES (?, ?, ?)
-        """, (order_id, "kitchen_started", "system"))
+        # If status is 'preparing', lock the order
+        if status == 'preparing':
+            cur.execute("""
+                INSERT OR IGNORE INTO order_locks (order_id, lock_reason, locked_by)
+                VALUES (?, ?, ?)
+            """, (order_id, "kitchen_started", "system"))
 
-        cur.execute("UPDATE orders SET locked = 1 WHERE id = ?", (order_id,))
+            cur.execute("UPDATE orders SET locked = 1 WHERE id = ?", (order_id,))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
-    return jsonify({'success': True, 'status': status})
+        return jsonify({'success': True, 'status': status})
     except Exception as e:
-    print(f"Error updating status: {e}")
-    return jsonify({'success': False, 'error': str(e)})
+        print(f"Error updating status: {e}")
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route("/admin/menu/toggle", methods=["POST"])
 @admin_required
