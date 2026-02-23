@@ -31,6 +31,7 @@ if ADMIN_CODE == "MYCAFE2024":
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge
+EDIT_WINDOW_MINUTES = 15
 
 # =========================
 # MENU DATA
@@ -258,7 +259,19 @@ def save_cart_to_order(cart, user_id=None, table_id=None, session_token=None, gu
 @app.route("/")
 @login_required
 def home():
-    return render_template("home.html")
+    user = db.get_user(session.get("user", "")) if session.get("user") else None
+    orders = db.get_orders(user["id"]) if user else []
+
+    cafes_visited = len({o.get("cafe_name") or "MY CAFE" for o in orders}) if orders else 0
+    total_spent = sum((o.get("total") or 0) for o in orders)
+    total_orders = len(orders)
+
+    return render_template(
+        "home.html",
+        total_orders=total_orders,
+        cafes_visited=cafes_visited,
+        total_spent=total_spent
+    )
 
 
 @app.route("/start")
@@ -354,6 +367,12 @@ def remove_item():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+
+@app.route("/profile")
+def profile():
+    user = session.get("user")
+    return render_template("profile.html", user=user)
 
 @app.route('/finish', methods=['POST'])
 def finish():
@@ -790,10 +809,8 @@ def admin_orders():
             order['status'] = 'pending'
 
         order['bill'] = db.get_bill(order['id'])
-        if isinstance(items_string, str):
-            order['items_list'] = parse_order_items(items_string)
-        else:
-            order['items_list'] = []
+        items_string = order.get('items', '')
+        order['items_list'] = parse_order_items(items_string) if isinstance(items_string, str) else []
         orders_with_users.append(order)
 
     return render_template("admin/kitchen.html", orders=orders_with_users)

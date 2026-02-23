@@ -20,58 +20,60 @@
 </head>
 
 <body>
-    <!-- Modern Navbar -->
-    <!-- Modern Navbar (UPDATED STRUCTURE) -->
-    <nav class="navbar">
-
-        <!-- LEFT: Logo -->
+    <!-- App Header -->
+    <nav class="navbar app-header">
         <div class="nav-left">
-            <h2 class="logo">
+            <h2 class="logo app-logo">
                 <a href="/">MY CAFE</a>
             </h2>
         </div>
 
-        <!-- CENTER: CART (Always Visible on Mobile) -->
-        <div class="nav-center">
-            <a href="javascript:void(0)" onclick="toggleCart()" class="cart-icon-visible" title="Cart">
-                <img src="/static/cart.svg" alt="Cart">
-            </a>
-        </div>
-
-        <!-- RIGHT: Three Dots Menu -->
         <div class="nav-right">
-            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                <i class="fas fa-ellipsis-v"></i>
+            <button class="notification-btn" onclick="toggleNotifications()" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-dot" id="notificationDot" hidden></span>
             </button>
         </div>
-
-        <!-- Hidden Menu (Opens on 3 dots click) -->
-        <ul class="nav-links" id="navLinks">
-            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="/start"><i class="fas fa-utensils"></i> New Order</a></li>
-            <li><a href="/orders"><i class="fas fa-receipt"></i> History</a></li>
-            <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
-
-            {% if session.get("user") %}
-            {% if not session.get("is_admin") %}
-            <li><a href="/become-admin"><i class="fas fa-crown"></i> Become Admin</a></li>
-            {% else %}
-            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-            {% endif %}
-            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            {% else %}
-            <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
-            <li><a href="/signup"><i class="fas fa-user-plus"></i> Signup</a></li>
-            {% endif %}
-        </ul>
-
     </nav>
 
+    <div class="notification-panel" id="notificationPanel" aria-live="polite">
+        <div class="notification-panel-header">
+            <h3>Notifications</h3>
+            <button class="notification-close" onclick="toggleNotifications(false)"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="notificationList" class="notification-list">
+            <p class="notification-empty">No notifications yet.</p>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main-container">
         {% block content %}{% endblock %}
     </main>
+
+
+
+    <nav class="mobile-app-nav" aria-label="App Navigation">
+        <a href="/" class="app-nav-btn {% if request.path == '/' %}active{% endif %}">
+            <i class="fas fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="/qr_scanner" class="app-nav-btn {% if request.path == '/qr_scanner' %}active{% endif %}">
+            <i class="fas fa-qrcode"></i>
+            <span>Scan</span>
+        </a>
+        <a href="javascript:void(0)" onclick="toggleCart()" class="app-nav-btn cart-center {% if request.path == '/order' %}active{% endif %}" title="Cart">
+            <i class="fas fa-cart-shopping"></i>
+        </a>
+        <a href="/orders" class="app-nav-btn {% if request.path == '/orders' %}active{% endif %}">
+            <i class="fas fa-receipt"></i>
+            <span>History</span>
+        </a>
+        <a href="/profile" class="app-nav-btn {% if request.path == '/profile' %}active{% endif %}">
+            <i class="fas fa-user-gear"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
 
     <!-- Footer -->
     <!-- In base.html, update the footer section -->
@@ -193,40 +195,6 @@
         }
 
         // =====================================================
-        // MOBILE MENU TOGGLE
-        // =====================================================
-        function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
-
-            // Close cart if open
-            const cart = document.getElementById("cartSidebar");
-            if (cart && cart.classList.contains("active")) {
-                cart.classList.remove("active");
-            }
-        }
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function (event) {
-            const navLinks = document.getElementById('navLinks');
-            const mobileToggle = document.querySelector('.mobile-menu-toggle');
-
-            if (navLinks && navLinks.classList.contains('active') &&
-                !navLinks.contains(event.target) &&
-                !mobileToggle.contains(event.target)) {
-                navLinks.classList.remove('active');
-            }
-        });
-
-        // Close mobile menu on link click
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                const navLinks = document.getElementById('navLinks');
-                if (navLinks) navLinks.classList.remove('active');
-            });
-        });
-
-        // =====================================================
         // CART FUNCTIONS
         // =====================================================
         function toggleCart() {
@@ -288,7 +256,7 @@
                 {% endif %}
 
                 const totalItems = Object.values(cartData).reduce((sum, qty) => sum + qty, 0);
-                const badge = document.querySelector('.cart-icon-visible');
+                const badge = document.querySelector('.app-nav-btn.cart-center');
 
 
                 if (badge && totalItems > 0) {
@@ -301,11 +269,71 @@
             }
         }
 
+        function toggleNotifications(forceState = null) {
+            const panel = document.getElementById('notificationPanel');
+            if (!panel) return;
+
+            const shouldOpen = forceState === null ? !panel.classList.contains('active') : forceState;
+            panel.classList.toggle('active', shouldOpen);
+
+            if (shouldOpen) {
+                loadNotifications();
+            }
+        }
+
+        async function markNotificationRead(notificationId) {
+            await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' });
+            loadNotifications();
+        }
+
+        async function loadNotifications() {
+            const list = document.getElementById('notificationList');
+            const dot = document.getElementById('notificationDot');
+            if (!list || !dot) return;
+
+            try {
+                const res = await fetch('/api/notifications');
+                if (!res.ok) throw new Error('Could not load notifications');
+
+                const data = await res.json();
+                const notifications = data.notifications || [];
+
+                dot.hidden = !(data.unread_count > 0);
+
+                if (!notifications.length) {
+                    list.innerHTML = '<p class="notification-empty">No notifications yet.</p>';
+                    return;
+                }
+
+                list.innerHTML = notifications.map((item) => `
+                    <button class="notification-item ${item.is_read ? '' : 'unread'}" onclick="markNotificationRead(${item.id})">
+                        <p>${item.message}</p>
+                        <span>${item.created_at || ''}</span>
+                    </button>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = '<p class="notification-empty">Login to view notifications.</p>';
+            }
+        }
+
+
+        document.addEventListener('click', function (event) {
+            const panel = document.getElementById('notificationPanel');
+            const trigger = document.querySelector('.notification-btn');
+            if (!panel || !trigger) return;
+
+            if (panel.classList.contains('active') && !panel.contains(event.target) && !trigger.contains(event.target)) {
+                panel.classList.remove('active');
+            }
+        });
+
         // =====================================================
         // INITIALIZE ON PAGE LOAD
         // =====================================================
         document.addEventListener('DOMContentLoaded', function () {
             updateCartBadge();
+            loadNotifications();
+            setInterval(loadNotifications, 20000);
 
             // Initialize cart display if cart exists
             try {
