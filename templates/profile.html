@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="profile-screen">
+    <div class="profile-header">
+        <h1>Settings</h1>
+        <p>Control your account and app preferences</p>
+    </div>
+
+    <div class="settings-card">
+        <a class="settings-row" href="/terms"><i class="fas fa-file-signature"></i><span>Terms & Conditions</span><i class="fas fa-chevron-right"></i></a>
+        <a class="settings-row" href="/privacy"><i class="fas fa-user-shield"></i><span>Privacy Policy</span><i class="fas fa-chevron-right"></i></a>
+        <a class="settings-row" href="https://mycook-droid.github.io/Zishan_droid/" target="_blank" rel="noopener"><i class="fas fa-id-card"></i><span>Developer Details</span><i class="fas fa-chevron-right"></i></a>
+        <a class="settings-row" href="/about"><i class="fas fa-circle-info"></i><span>About Us</span><i class="fas fa-chevron-right"></i></a>
+        <a class="settings-row" href="{{ "/admin/settings" if session.get('is_admin') else "/become-admin" }}"><i class="fas fa-sliders"></i><span>System Settings</span><i class="fas fa-chevron-right"></i></a>
+    </div>
+
+    {% if session.get('is_admin') %}
+    <h2 class="settings-group-title">Admin Controls</h2>
+    <div class="settings-card">
+        <a class="settings-row" href="/admin/menu"><i class="fas fa-list-check"></i><span>Manage Menu</span><i class="fas fa-chevron-right"></i></a>
+        <a class="settings-row" href="/admin/orders"><i class="fas fa-bolt"></i><span>Force Actions</span><i class="fas fa-chevron-right"></i></a>
+    </div>
+    {% endif %}
+
+    {% if user %}
+    <div class="profile-user-pill">
+        Logged in as <strong>{{ user.name or user.username }}</strong>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

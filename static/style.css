@@ -1646,3 +1646,190 @@ input:checked + .slider:before {
     }
 
 }
+
+/* Mobile app shell refinements */
+.main-container {
+    padding-bottom: 7rem;
+}
+
+.mobile-app-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #f7f4ee;
+    border-top: 1px solid #e2d8c8;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: end;
+    padding: 0.45rem 0.5rem 0.55rem;
+    z-index: 1001;
+}
+
+.app-nav-btn {
+    text-decoration: none;
+    color: #434857;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.app-nav-btn i {
+    font-size: 1.2rem;
+}
+
+.app-nav-btn.active {
+    color: #e56d2c;
+}
+
+.app-nav-btn.cart-center {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    justify-self: center;
+    margin-top: -26px;
+    background: linear-gradient(180deg, #203c72, #102149);
+    color: white;
+    box-shadow: 0 12px 25px rgba(12, 27, 65, 0.35);
+    justify-content: center;
+}
+
+.app-nav-btn.cart-center i {
+    font-size: 1.7rem;
+}
+
+.app-nav-btn.cart-center span {
+    display: none;
+}
+
+.app-home {
+    background: radial-gradient(circle at top, rgba(127, 77, 34, 0.45), rgba(47, 31, 20, 0.92));
+    border-radius: 24px;
+    padding: 1.25rem 1rem 2rem;
+    color: #fff;
+}
+
+.app-home-hero {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.app-home-hero h1 {
+    color: #fff;
+    font-size: 2rem;
+}
+
+.app-home-hero p {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.order-options.mobile-style {
+    gap: 0.75rem;
+    margin-bottom: 1.2rem;
+}
+
+.order-options.mobile-style .order-card {
+    min-height: auto;
+    padding: 1rem;
+}
+
+.card-emoji {
+    font-size: 2.4rem;
+}
+
+.order-options.mobile-style .order-card h2 {
+    font-size: 1.6rem;
+}
+
+.history-preview {
+    background: #f6f1e7;
+    border-radius: 28px 28px 0 0;
+    margin: 0 -1rem -2rem;
+    padding: 1rem;
+    color: #171717;
+}
+
+.history-preview h3 {
+    text-align: center;
+    margin-bottom: 0.9rem;
+}
+
+.history-card {
+    text-decoration: none;
+    background: linear-gradient(120deg, #1c7a61, #0d5c47);
+    color: white;
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-cafe {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.history-sub {
+    opacity: 0.9;
+}
+
+.history-total {
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-weight: 700;
+}
+
+.profile-screen {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.settings-card {
+    background: #f6f4ef;
+    border: 1px solid #ded7c8;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.settings-row {
+    text-decoration: none;
+    color: #252525;
+    padding: 0.95rem;
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 0.7rem;
+    border-bottom: 1px solid #e7dfd1;
+}
+
+.settings-row:last-child { border-bottom: 0; }
+.settings-row i:first-child { color: #595f6a; }
+.settings-row i:last-child { color: #8b8f99; }
+
+.settings-group-title {
+    margin: 1.4rem 0 0.8rem;
+}
+
+.profile-user-pill {
+    margin: 1rem 0;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e7dfd1;
+    padding: 0.85rem 1rem;
+}
+
+@media (min-width: 900px) {
+    .mobile-app-nav { max-width: 430px; margin: 0 auto; left: 50%; transform: translateX(-50%); border-radius: 18px 18px 0 0; }
+    .main-container { padding-bottom: 8rem; }
+}

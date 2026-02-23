@@ -355,6 +355,12 @@ def remove_item():
 def about():
     return render_template("about.html")
 
+
+@app.route("/profile")
+def profile():
+    user = session.get("user")
+    return render_template("profile.html", user=user)
+
 @app.route('/finish', methods=['POST'])
 def finish():
     if 'user' not in session:
