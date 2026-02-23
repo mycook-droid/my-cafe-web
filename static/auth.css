@@ -609,3 +609,45 @@ body.light .back-home a {
         transition: none !important;
     }
 }
+
+.auth-link-text {
+    margin-top: 0.9rem;
+    font-size: 0.9rem;
+    color: var(--auth-text-muted-dark);
+}
+
+.auth-link-text a {
+    color: var(--auth-accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link-text a:hover {
+    text-decoration: underline;
+}
+
+.compact-auth {
+    max-width: 380px;
+    padding: 1.75rem;
+}
+
+.auth-card .btn {
+    display: inline-block;
+    width: 100%;
+    padding: 0.875rem;
+    border-radius: 8px;
+    background: var(--auth-accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 0.6rem;
+}
+
+.auth-card .btn:hover {
+    background: var(--auth-accent-hover);
+}
+
+.auth-card button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}

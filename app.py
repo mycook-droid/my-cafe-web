@@ -13,11 +13,16 @@ load_dotenv()  # Load environment variables
 
 app = Flask(__name__)
 
-# Render/production may not provide a local .env file, so use safe fallbacks.
-# You should still set both variables in your hosting dashboard.
-app.secret_key = os.environ.get("SECRET_KEY") or "dev-secret-key-change-me"
-if app.secret_key == "dev-secret-key-change-me":
-    print("⚠️ SECRET_KEY not set. Using development fallback key.")
+# Security-focused configuration
+app.secret_key = os.environ.get("SECRET_KEY") or str(uuid4())
+if not os.environ.get("SECRET_KEY"):
+    print("⚠️ SECRET_KEY not set. Generated ephemeral key for this run.")
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("FLASK_ENV") == "production"
+)
 
 # Initialize database on startup
 db.init_db()
@@ -25,9 +30,10 @@ db.init_db()
 # =========================
 # CONFIGURATION
 # =========================
-ADMIN_CODE = os.environ.get("ADMIN_CODE") or "MYCAFE2024"
-if ADMIN_CODE == "MYCAFE2024":
-    print("⚠️ ADMIN_CODE not set. Using fallback admin code.")
+ADMIN_CODE = os.environ.get("ADMIN_CODE")
+if not ADMIN_CODE:
+    ADMIN_CODE = str(uuid4())
+    print("⚠️ ADMIN_CODE not set. Admin elevation disabled with one-time runtime code.")
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge
@@ -707,14 +713,11 @@ def login():
     password = request.form.get("password", "")
 
     if not username or not password:
-        return "Username and password required", 400
+        return render_template("login.html", error="Username and password are required."), 400
 
     user = db.get_user(username)
-    if not user:
-        return "User not found. Please check your username or sign up.", 404
-
-    if not check_password_hash(user["password"], password):
-        return "Wrong password. Please try again.", 401
+    if not user or not check_password_hash(user["password"], password):
+        return render_template("login.html", error="Invalid username or password."), 401
 
     session["user"] = user["username"]
     session["user_id"] = user["id"]
@@ -733,11 +736,14 @@ def signup():
     email = request.form.get("email", "").strip()
     phone = request.form.get("phone", "").strip()
 
-    if not username or not password:
-        return "Username and password required", 400
+    if not username or not password or not name or not email or not phone:
+        return render_template("signup.html", error="All fields are required."), 400
+
+    if len(password) < 8:
+        return render_template("signup.html", error="Password must be at least 8 characters."), 400
 
     if db.user_exists(username):
-        return "Username already exists | Try a different one", 400
+        return render_template("signup.html", error="Username already exists. Try a different one."), 400
 
     hashed = generate_password_hash(password)
     success = db.create_user(username, hashed, name, email, phone)
@@ -745,7 +751,7 @@ def signup():
     if success:
         return redirect("/login?created=1")
     else:
-        return "Error creating account. Please try again.", 500
+        return render_template("signup.html", error="Error creating account. Please try again."), 500
 
 @app.route("/logout")
 def logout():
@@ -761,16 +767,20 @@ def become_admin():
     if request.method == "GET":
         user = db.get_user(session.get("user"))
         is_admin = db.is_user_admin(session.get("user"))
-        return render_template("become_admin.html", user=user, is_admin=is_admin)
+        return render_template("become_admin.html", user=user, is_admin=is_admin, admin_code_configured=bool(os.environ.get("ADMIN_CODE")))
 
     admin_code = request.form.get("admin_code", "").strip()
 
-    if admin_code == ADMIN_CODE:
+    if admin_code == ADMIN_CODE and os.environ.get("ADMIN_CODE"):
         db.make_user_admin(session.get("user"))
-        session["is_admin"] = True  # ✅ ADD THIS LINE
+        session["is_admin"] = True
         return redirect("/?admin_success=1")
-    else:
-        return render_template("become_admin.html", error="Invalid admin code. Please try again.")
+
+    return render_template(
+        "become_admin.html",
+        error="Invalid security code.",
+        admin_code_configured=bool(os.environ.get("ADMIN_CODE"))
+    )
 
 @app.route("/admin")
 @admin_required
@@ -881,7 +891,7 @@ def admin_analytics():
 def admin_settings():
     user = db.get_user(session.get("user"))
     all_users = db.get_all_users()
-    return render_template("admin/settings.html", user=user, all_users=all_users)
+    return render_template("admin/settings.html", user=user, all_users=all_users, admin_code_configured=bool(os.environ.get("ADMIN_CODE")))
 
 # =========================
 # ADMIN API ENDPOINTS - PART 3/3
