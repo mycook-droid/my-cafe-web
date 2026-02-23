@@ -34,7 +34,7 @@
         <!-- CENTER: CART (Always Visible on Mobile) -->
         <div class="nav-center">
             <a href="javascript:void(0)" onclick="toggleCart()" class="cart-icon-visible" title="Cart">
-                <img src="/static/cart.svg" alt="Cart">
+                <i class="fas fa-cart-shopping" aria-hidden="true"></i>
             </a>
         </div>
 
@@ -51,6 +51,7 @@
             <li><a href="/start"><i class="fas fa-utensils"></i> New Order</a></li>
             <li><a href="/orders"><i class="fas fa-receipt"></i> History</a></li>
             <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+            <li><a href="/profile"><i class="fas fa-user-gear"></i> Profile & Settings</a></li>
 
             {% if session.get("user") %}
             {% if not session.get("is_admin") %}
@@ -72,6 +73,30 @@
     <main class="main-container">
         {% block content %}{% endblock %}
     </main>
+
+
+
+    <nav class="mobile-app-nav" aria-label="App Navigation">
+        <a href="/" class="app-nav-btn {% if request.path == '/' %}active{% endif %}">
+            <i class="fas fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="/qr_scanner" class="app-nav-btn {% if request.path == '/qr_scanner' %}active{% endif %}">
+            <i class="fas fa-qrcode"></i>
+            <span>Scan</span>
+        </a>
+        <a href="javascript:void(0)" onclick="toggleCart()" class="app-nav-btn cart-center {% if request.path == '/order' %}active{% endif %}" title="Cart">
+            <i class="fas fa-cart-shopping"></i>
+        </a>
+        <a href="/orders" class="app-nav-btn {% if request.path == '/orders' %}active{% endif %}">
+            <i class="fas fa-receipt"></i>
+            <span>History</span>
+        </a>
+        <a href="/profile" class="app-nav-btn {% if request.path == '/profile' %}active{% endif %}">
+            <i class="fas fa-user-gear"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
 
     <!-- Footer -->
     <!-- In base.html, update the footer section -->
