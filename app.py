@@ -770,7 +770,7 @@ def become_admin():
 
     admin_code = request.form.get("admin_code", "").strip()
 
-    if admin_code == ADMIN_CODE:
+    if admin_code == ADMIN_CODE and os.environ.get("ADMIN_CODE"):
         db.make_user_admin(session.get("user"))
         session["is_admin"] = True
         return redirect("/?admin_success=1")
