@@ -2,50 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Access | MY CAFE 2050</title>
+    <title>Admin Access | MY CAFE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="auth-body">
-
-    <div class="auth-card">
+    <div class="auth-card compact-auth auth-premium">
         {% if is_admin %}
-        <h1 style="color:var(--neon-blue)">ACCESS GRANTED</h1>
-        <p class="subtitle">Administrator Privileges Active</p>
-        
-        <div style="text-align:center; margin: 2rem 0;">
-            <i class="fas fa-shield-alt" style="font-size:4rem; color:var(--neon-blue)"></i>
-        </div>
-
-        <a href="/admin" class="btn" style="width:100%; display:block; text-align:center;">
-            ENTER COMMAND CENTER
-        </a>
-
+        <h1>Admin Access Enabled</h1>
+        <p class="subtitle">You already have admin privileges.</p>
+        <a href="/admin" class="btn">Open Admin Dashboard</a>
         {% else %}
-        <h1 style="color: #ff4444;">SECURITY CHECK</h1>
-        <p class="subtitle">Enter Override Code</p>
+        <h1>Security Check</h1>
+        <p class="subtitle">Enter the admin security code</p>
 
         {% if error %}
-        <div class="error" style="color:#ff4444; text-align:center; margin-bottom:1rem;">{{ error }}</div>
+        <div class="error"><i class="fas fa-triangle-exclamation"></i> {{ error }}</div>
+        {% endif %}
+
+        {% if not admin_code_configured %}
+        <div class="error"><i class="fas fa-lock"></i> Admin code is not configured by server owner.</div>
         {% endif %}
 
         <form method="POST" action="/become-admin">
-            <div class="input-group">
-                <input type="password" name="admin_code" placeholder="ENTER CODE..." required style="text-align:center; letter-spacing:5px; font-family:'Orbitron'">
-            </div>
-            <button type="submit" style="background: #ff4444; color:white;">
-                AUTHENTICATE
-            </button>
+            <input type="password" name="admin_code" placeholder="Security code" required minlength="6" autocomplete="off">
+            <button type="submit" {% if not admin_code_configured %}disabled{% endif %}>Authenticate</button>
         </form>
-        
-        <div class="divider">SYSTEM INFO</div>
-        <p class="terms">Default Protocol: MYCAFE2024</p>
-        
-        <div style="margin-top:2rem; text-align:center;">
-            <a href="/" style="color:var(--text-muted); text-decoration:none;"><i class="fas fa-arrow-left"></i> ABORT</a>
-        </div>
+
+        <p class="auth-link-text"><a href="/profile">← Back to profile</a></p>
         {% endif %}
     </div>
 </body>

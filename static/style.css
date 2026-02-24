@@ -1686,6 +1686,7 @@ input:checked + .slider:before {
 }
 
 .app-nav-btn.cart-center {
+    position: relative;
     width: 64px;
     height: 64px;
     border-radius: 20px;

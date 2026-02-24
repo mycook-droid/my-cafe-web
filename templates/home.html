@@ -7,13 +7,13 @@
     </div>
 
     <section class="order-options mobile-style">
-        <div class="order-card primary">
+        <div class="order-card primary app-order-card">
             <div class="card-emoji">🪑</div>
             <h2>Dine-In Experience</h2>
             <a href="/start" class="btn">Start Ordering</a>
         </div>
 
-        <div class="order-card secondary">
+        <div class="order-card secondary app-order-card app-order-card-alt">
             <div class="card-emoji">🛵</div>
             <h2>Home Delivery</h2>
             <span class="coming-soon">Coming Soon</span>
@@ -24,10 +24,10 @@
         <h3>— Your Order History —</h3>
         <a class="history-card" href="/orders">
             <div>
-                <p class="history-cafe">Central Perk</p>
-                <p class="history-sub">3 Orders</p>
+                <p class="history-cafe">Cafes Visited: {{ cafes_visited or 0 }}</p>
+                <p class="history-sub">Total Orders: {{ total_orders or 0 }}</p>
             </div>
-            <div class="history-total">Total: ₹785</div>
+            <div class="history-total">Spent: ₹{{ total_spent or 0 }}</div>
         </a>
     </section>
 </section>

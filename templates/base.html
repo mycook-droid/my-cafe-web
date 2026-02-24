@@ -20,13 +20,10 @@
 </head>
 
 <body>
-    <!-- Modern Navbar -->
-    <!-- Modern Navbar (UPDATED STRUCTURE) -->
-    <nav class="navbar">
-
-        <!-- LEFT: Logo -->
+    <!-- App Header -->
+    <nav class="navbar app-header">
         <div class="nav-left">
-            <h2 class="logo">
+            <h2 class="logo app-logo">
                 <a href="/">MY CAFE</a>
             </h2>
         </div>
@@ -40,8 +37,9 @@
 
         <!-- RIGHT: Three Dots Menu -->
         <div class="nav-right">
-            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                <i class="fas fa-ellipsis-v"></i>
+            <button class="notification-btn" onclick="toggleNotifications()" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-dot" id="notificationDot" hidden></span>
             </button>
         </div>
 
@@ -68,6 +66,15 @@
 
     </nav>
 
+    <div class="notification-panel" id="notificationPanel" aria-live="polite">
+        <div class="notification-panel-header">
+            <h3>Notifications</h3>
+            <button class="notification-close" onclick="toggleNotifications(false)"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="notificationList" class="notification-list">
+            <p class="notification-empty">No notifications yet.</p>
+        </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main-container">
@@ -218,40 +225,6 @@
         }
 
         // =====================================================
-        // MOBILE MENU TOGGLE
-        // =====================================================
-        function toggleMobileMenu() {
-            const navLinks = document.getElementById('navLinks');
-            navLinks.classList.toggle('active');
-
-            // Close cart if open
-            const cart = document.getElementById("cartSidebar");
-            if (cart && cart.classList.contains("active")) {
-                cart.classList.remove("active");
-            }
-        }
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function (event) {
-            const navLinks = document.getElementById('navLinks');
-            const mobileToggle = document.querySelector('.mobile-menu-toggle');
-
-            if (navLinks && navLinks.classList.contains('active') &&
-                !navLinks.contains(event.target) &&
-                !mobileToggle.contains(event.target)) {
-                navLinks.classList.remove('active');
-            }
-        });
-
-        // Close mobile menu on link click
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                const navLinks = document.getElementById('navLinks');
-                if (navLinks) navLinks.classList.remove('active');
-            });
-        });
-
-        // =====================================================
         // CART FUNCTIONS
         // =====================================================
         function toggleCart() {
@@ -313,7 +286,7 @@
                 {% endif %}
 
                 const totalItems = Object.values(cartData).reduce((sum, qty) => sum + qty, 0);
-                const badge = document.querySelector('.cart-icon-visible');
+                const badge = document.querySelector('.app-nav-btn.cart-center');
 
 
                 if (badge && totalItems > 0) {
@@ -326,11 +299,71 @@
             }
         }
 
+        function toggleNotifications(forceState = null) {
+            const panel = document.getElementById('notificationPanel');
+            if (!panel) return;
+
+            const shouldOpen = forceState === null ? !panel.classList.contains('active') : forceState;
+            panel.classList.toggle('active', shouldOpen);
+
+            if (shouldOpen) {
+                loadNotifications();
+            }
+        }
+
+        async function markNotificationRead(notificationId) {
+            await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' });
+            loadNotifications();
+        }
+
+        async function loadNotifications() {
+            const list = document.getElementById('notificationList');
+            const dot = document.getElementById('notificationDot');
+            if (!list || !dot) return;
+
+            try {
+                const res = await fetch('/api/notifications');
+                if (!res.ok) throw new Error('Could not load notifications');
+
+                const data = await res.json();
+                const notifications = data.notifications || [];
+
+                dot.hidden = !(data.unread_count > 0);
+
+                if (!notifications.length) {
+                    list.innerHTML = '<p class="notification-empty">No notifications yet.</p>';
+                    return;
+                }
+
+                list.innerHTML = notifications.map((item) => `
+                    <button class="notification-item ${item.is_read ? '' : 'unread'}" onclick="markNotificationRead(${item.id})">
+                        <p>${item.message}</p>
+                        <span>${item.created_at || ''}</span>
+                    </button>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = '<p class="notification-empty">Login to view notifications.</p>';
+            }
+        }
+
+
+        document.addEventListener('click', function (event) {
+            const panel = document.getElementById('notificationPanel');
+            const trigger = document.querySelector('.notification-btn');
+            if (!panel || !trigger) return;
+
+            if (panel.classList.contains('active') && !panel.contains(event.target) && !trigger.contains(event.target)) {
+                panel.classList.remove('active');
+            }
+        });
+
         // =====================================================
         // INITIALIZE ON PAGE LOAD
         // =====================================================
         document.addEventListener('DOMContentLoaded', function () {
             updateCartBadge();
+            loadNotifications();
+            setInterval(loadNotifications, 20000);
 
             // Initialize cart display if cart exists
             try {
