@@ -8,9 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="auth-body">
-    <div class="auth-card signup-card compact-auth">
-        <h1>Create Account</h1>
-        <p class="subtitle">Join MY CAFE in less than a minute</p>
+    <div class="auth-card signup-card compact-auth auth-premium">
+        <div class="auth-brand">
+            <div class="auth-brand-icon"><i class="fas fa-coffee"></i></div>
+            <h1>Create Account</h1>
+            <p class="subtitle">Join MY CAFE in less than a minute</p>
+        </div>
 
         {% if error %}
         <div class="error"><i class="fas fa-triangle-exclamation"></i> {{ error }}</div>

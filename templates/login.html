@@ -8,9 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="auth-body">
-    <div class="auth-card compact-auth">
-        <h1>Welcome Back</h1>
-        <p class="subtitle">Sign in to continue ordering</p>
+    <div class="auth-card compact-auth auth-premium">
+        <div class="auth-brand">
+            <div class="auth-brand-icon"><i class="fas fa-mug-hot"></i></div>
+            <h1>Welcome Back</h1>
+            <p class="subtitle">Sign in to continue ordering</p>
+        </div>
 
         {% if message %}
         <div class="success"><i class="fas fa-circle-check"></i> {{ message }}</div>

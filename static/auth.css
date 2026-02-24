@@ -651,3 +651,47 @@ body.light .back-home a {
     opacity: 0.55;
     cursor: not-allowed;
 }
+
+
+.auth-premium {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 40px rgba(8, 20, 45, 0.36);
+    background: linear-gradient(165deg, rgba(31, 46, 72, 0.96), rgba(21, 33, 57, 0.96));
+}
+
+.auth-brand {
+    margin-bottom: 1.2rem;
+}
+
+.auth-brand-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 0.7rem;
+    border-radius: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.35rem;
+    background: linear-gradient(135deg, #4c8df1, #2f5fc4);
+    box-shadow: 0 10px 24px rgba(35, 86, 191, 0.4);
+}
+
+.auth-premium .subtitle {
+    margin-bottom: 1.2rem;
+}
+
+.auth-premium input {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(122, 150, 198, 0.35);
+}
+
+.auth-premium input:focus {
+    border-color: #4c8df1;
+    box-shadow: 0 0 0 3px rgba(76, 141, 241, 0.18);
+}
+
+.auth-premium button,
+.auth-premium .btn {
+    background: linear-gradient(135deg, #4c8df1, #3f79dc);
+}
