@@ -767,6 +767,7 @@ def become_admin():
     if request.method == "GET":
         user = db.get_user(session.get("user"))
         is_admin = db.is_user_admin(session.get("user"))
+        return render_template("become_admin.html", user=user, is_admin=is_admin, admin_code_configured=bool(ADMIN_CODE))
         return render_template("become_admin.html", user=user, is_admin=is_admin, admin_code_configured=bool(os.environ.get("ADMIN_CODE")))
 
     admin_code = request.form.get("admin_code", "").strip()
@@ -779,6 +780,7 @@ def become_admin():
     return render_template(
         "become_admin.html",
         error="Invalid security code.",
+        admin_code_configured=bool(ADMIN_CODE)
         admin_code_configured=bool(os.environ.get("ADMIN_CODE"))
     )
 
@@ -891,6 +893,7 @@ def admin_analytics():
 def admin_settings():
     user = db.get_user(session.get("user"))
     all_users = db.get_all_users()
+    return render_template("admin/settings.html", user=user, all_users=all_users, admin_code_configured=bool(ADMIN_CODE))
     return render_template("admin/settings.html", user=user, all_users=all_users, admin_code_configured=bool(os.environ.get("ADMIN_CODE")))
 
 # =========================
@@ -1332,8 +1335,21 @@ def update_order_status(order_id):
 
             cur.execute("UPDATE orders SET locked = 1 WHERE id = ?", (order_id,))
 
+        cur.execute("SELECT user_id, table_id FROM orders WHERE id = ?", (order_id,))
+        order_row = cur.fetchone()
+
         conn.commit()
         conn.close()
+
+        if order_row and order_row[0]:
+            status_message_map = {
+                'preparing': f"Order #{order_id} is now being prepared 👨‍🍳",
+                'ready': f"Order #{order_id} is ready for pickup ✅",
+                'completed': f"Order #{order_id} has been completed 🎉",
+                'cancelled': f"Order #{order_id} was cancelled",
+                'pending': f"Order #{order_id} status changed to pending"
+            }
+            db.create_notification(order_id, order_row[0], order_row[1], status_message_map.get(status, f"Order #{order_id} status updated"), "admin_action")
 
         return jsonify({'success': True, 'status': status})
     except Exception as e:
