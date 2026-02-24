@@ -13,11 +13,16 @@ load_dotenv()  # Load environment variables
 
 app = Flask(__name__)
 
-# Render/production may not provide a local .env file, so use safe fallbacks.
-# You should still set both variables in your hosting dashboard.
-app.secret_key = os.environ.get("SECRET_KEY") or "dev-secret-key-change-me"
-if app.secret_key == "dev-secret-key-change-me":
-    print("⚠️ SECRET_KEY not set. Using development fallback key.")
+# Security-focused configuration
+app.secret_key = os.environ.get("SECRET_KEY") or str(uuid4())
+if not os.environ.get("SECRET_KEY"):
+    print("⚠️ SECRET_KEY not set. Generated ephemeral key for this run.")
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("FLASK_ENV") == "production"
+)
 
 # Initialize database on startup
 db.init_db()
@@ -25,12 +30,13 @@ db.init_db()
 # =========================
 # CONFIGURATION
 # =========================
-ADMIN_CODE = os.environ.get("ADMIN_CODE") or "MYCAFE2024"
-if ADMIN_CODE == "MYCAFE2024":
-    print("⚠️ ADMIN_CODE not set. Using fallback admin code.")
+ADMIN_CODE = (os.environ.get("ADMIN_CODE") or "TEMP-ADMIN-1234").strip()
+if not os.environ.get("ADMIN_CODE"):
+    print("⚠️ ADMIN_CODE not set. Using temporary admin code: TEMP-ADMIN-1234 (set ADMIN_CODE in env for production).")
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge
+EDIT_WINDOW_MINUTES = 15
 
 # =========================
 # MENU DATA
@@ -258,7 +264,19 @@ def save_cart_to_order(cart, user_id=None, table_id=None, session_token=None, gu
 @app.route("/")
 @login_required
 def home():
-    return render_template("home.html")
+    user = db.get_user(session.get("user", "")) if session.get("user") else None
+    orders = db.get_orders(user["id"]) if user else []
+
+    cafes_visited = len({o.get("cafe_name") or "MY CAFE" for o in orders}) if orders else 0
+    total_spent = sum((o.get("total") or 0) for o in orders)
+    total_orders = len(orders)
+
+    return render_template(
+        "home.html",
+        total_orders=total_orders,
+        cafes_visited=cafes_visited,
+        total_spent=total_spent
+    )
 
 
 @app.route("/start")
@@ -354,6 +372,12 @@ def remove_item():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+
+@app.route("/profile")
+def profile():
+    user = session.get("user")
+    return render_template("profile.html", user=user)
 
 @app.route('/finish', methods=['POST'])
 def finish():
@@ -688,14 +712,11 @@ def login():
     password = request.form.get("password", "")
 
     if not username or not password:
-        return "Username and password required", 400
+        return render_template("login.html", error="Username and password are required."), 400
 
     user = db.get_user(username)
-    if not user:
-        return "User not found. Please check your username or sign up.", 404
-
-    if not check_password_hash(user["password"], password):
-        return "Wrong password. Please try again.", 401
+    if not user or not check_password_hash(user["password"], password):
+        return render_template("login.html", error="Invalid username or password."), 401
 
     session["user"] = user["username"]
     session["user_id"] = user["id"]
@@ -714,11 +735,14 @@ def signup():
     email = request.form.get("email", "").strip()
     phone = request.form.get("phone", "").strip()
 
-    if not username or not password:
-        return "Username and password required", 400
+    if not username or not password or not name or not email or not phone:
+        return render_template("signup.html", error="All fields are required."), 400
+
+    if len(password) < 8:
+        return render_template("signup.html", error="Password must be at least 8 characters."), 400
 
     if db.user_exists(username):
-        return "Username already exists | Try a different one", 400
+        return render_template("signup.html", error="Username already exists. Try a different one."), 400
 
     hashed = generate_password_hash(password)
     success = db.create_user(username, hashed, name, email, phone)
@@ -726,7 +750,7 @@ def signup():
     if success:
         return redirect("/login?created=1")
     else:
-        return "Error creating account. Please try again.", 500
+        return render_template("signup.html", error="Error creating account. Please try again."), 500
 
 @app.route("/logout")
 def logout():
@@ -742,16 +766,20 @@ def become_admin():
     if request.method == "GET":
         user = db.get_user(session.get("user"))
         is_admin = db.is_user_admin(session.get("user"))
-        return render_template("become_admin.html", user=user, is_admin=is_admin)
+        return render_template("become_admin.html", user=user, is_admin=is_admin, admin_code_configured=bool(ADMIN_CODE))
 
     admin_code = request.form.get("admin_code", "").strip()
 
     if admin_code == ADMIN_CODE:
         db.make_user_admin(session.get("user"))
-        session["is_admin"] = True  # ✅ ADD THIS LINE
+        session["is_admin"] = True
         return redirect("/?admin_success=1")
-    else:
-        return render_template("become_admin.html", error="Invalid admin code. Please try again.")
+
+    return render_template(
+        "become_admin.html",
+        error="Invalid security code.",
+        admin_code_configured=bool(ADMIN_CODE)
+    )
 
 @app.route("/admin")
 @admin_required
@@ -790,10 +818,8 @@ def admin_orders():
             order['status'] = 'pending'
 
         order['bill'] = db.get_bill(order['id'])
-        if isinstance(items_string, str):
-            order['items_list'] = parse_order_items(items_string)
-        else:
-            order['items_list'] = []
+        items_string = order.get('items', '')
+        order['items_list'] = parse_order_items(items_string) if isinstance(items_string, str) else []
         orders_with_users.append(order)
 
     return render_template("admin/kitchen.html", orders=orders_with_users)
@@ -864,7 +890,7 @@ def admin_analytics():
 def admin_settings():
     user = db.get_user(session.get("user"))
     all_users = db.get_all_users()
-    return render_template("admin/settings.html", user=user, all_users=all_users)
+    return render_template("admin/settings.html", user=user, all_users=all_users, admin_code_configured=bool(ADMIN_CODE))
 
 # =========================
 # ADMIN API ENDPOINTS - PART 3/3
@@ -1305,8 +1331,21 @@ def update_order_status(order_id):
 
             cur.execute("UPDATE orders SET locked = 1 WHERE id = ?", (order_id,))
 
+        cur.execute("SELECT user_id, table_id FROM orders WHERE id = ?", (order_id,))
+        order_row = cur.fetchone()
+
         conn.commit()
         conn.close()
+
+        if order_row and order_row[0]:
+            status_message_map = {
+                'preparing': f"Order #{order_id} is now being prepared 👨‍🍳",
+                'ready': f"Order #{order_id} is ready for pickup ✅",
+                'completed': f"Order #{order_id} has been completed 🎉",
+                'cancelled': f"Order #{order_id} was cancelled",
+                'pending': f"Order #{order_id} status changed to pending"
+            }
+            db.create_notification(order_id, order_row[0], order_row[1], status_message_map.get(status, f"Order #{order_id} status updated"), "admin_action")
 
         return jsonify({'success': True, 'status': status})
     except Exception as e:
