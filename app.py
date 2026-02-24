@@ -30,9 +30,10 @@ db.init_db()
 # =========================
 # CONFIGURATION
 # =========================
-ADMIN_CODE = (os.environ.get("ADMIN_CODE") or "TEMP-ADMIN-1234").strip()
-if not os.environ.get("ADMIN_CODE"):
-    print("⚠️ ADMIN_CODE not set. Using temporary admin code: TEMP-ADMIN-1234 (set ADMIN_CODE in env for production).")
+ADMIN_CODE = os.environ.get("ADMIN_CODE")
+if not ADMIN_CODE:
+    ADMIN_CODE = str(uuid4())
+    print("⚠️ ADMIN_CODE not set. Admin elevation disabled with one-time runtime code.")
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge
@@ -767,10 +768,11 @@ def become_admin():
         user = db.get_user(session.get("user"))
         is_admin = db.is_user_admin(session.get("user"))
         return render_template("become_admin.html", user=user, is_admin=is_admin, admin_code_configured=bool(ADMIN_CODE))
+        return render_template("become_admin.html", user=user, is_admin=is_admin, admin_code_configured=bool(os.environ.get("ADMIN_CODE")))
 
     admin_code = request.form.get("admin_code", "").strip()
 
-    if admin_code == ADMIN_CODE:
+    if admin_code == ADMIN_CODE and os.environ.get("ADMIN_CODE"):
         db.make_user_admin(session.get("user"))
         session["is_admin"] = True
         return redirect("/?admin_success=1")
@@ -779,6 +781,7 @@ def become_admin():
         "become_admin.html",
         error="Invalid security code.",
         admin_code_configured=bool(ADMIN_CODE)
+        admin_code_configured=bool(os.environ.get("ADMIN_CODE"))
     )
 
 @app.route("/admin")
@@ -891,6 +894,7 @@ def admin_settings():
     user = db.get_user(session.get("user"))
     all_users = db.get_all_users()
     return render_template("admin/settings.html", user=user, all_users=all_users, admin_code_configured=bool(ADMIN_CODE))
+    return render_template("admin/settings.html", user=user, all_users=all_users, admin_code_configured=bool(os.environ.get("ADMIN_CODE")))
 
 # =========================
 # ADMIN API ENDPOINTS - PART 3/3

@@ -28,21 +28,51 @@
             </h2>
         </div>
 
+        <!-- CENTER: CART (Always Visible on Mobile) -->
+        <div class="nav-center">
+            <a href="javascript:void(0)" onclick="toggleCart()" class="cart-icon-visible" title="Cart">
+                <i class="fas fa-cart-shopping" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <!-- RIGHT: Three Dots Menu -->
         <div class="nav-right">
-            <button type="button" class="notification-btn" onclick="toggleNotifications(event)" aria-label="Notifications">
+            <button class="notification-btn" onclick="toggleNotifications()" aria-label="Notifications">
                 <i class="fas fa-bell"></i>
                 <span class="notification-dot" id="notificationDot" hidden></span>
             </button>
         </div>
+
+        <!-- Hidden Menu (Opens on 3 dots click) -->
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/start"><i class="fas fa-utensils"></i> New Order</a></li>
+            <li><a href="/orders"><i class="fas fa-receipt"></i> History</a></li>
+            <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+            <li><a href="/profile"><i class="fas fa-user-gear"></i> Profile & Settings</a></li>
+
+            {% if session.get("user") %}
+            {% if not session.get("is_admin") %}
+            <li><a href="/become-admin"><i class="fas fa-crown"></i> Become Admin</a></li>
+            {% else %}
+            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            {% endif %}
+            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            {% else %}
+            <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            <li><a href="/signup"><i class="fas fa-user-plus"></i> Signup</a></li>
+            {% endif %}
+        </ul>
+
     </nav>
 
-    <div class="notification-panel" id="notificationPanel" aria-live="polite" hidden>
+    <div class="notification-panel" id="notificationPanel" aria-live="polite">
         <div class="notification-panel-header">
             <h3>Notifications</h3>
-            <button type="button" class="notification-close" onclick="toggleNotifications(false)" aria-label="Close notifications">×</button>
+            <button class="notification-close" onclick="toggleNotifications(false)"><i class="fas fa-times"></i></button>
         </div>
         <div id="notificationList" class="notification-list">
-            <div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.</p></div>
+            <p class="notification-empty">No notifications yet.</p>
         </div>
     </div>
 
@@ -269,18 +299,12 @@
             }
         }
 
-        function toggleNotifications(eventOrState = null) {
+        function toggleNotifications(forceState = null) {
             const panel = document.getElementById('notificationPanel');
             if (!panel) return;
 
-            if (eventOrState && typeof eventOrState.stopPropagation === "function") {
-                eventOrState.stopPropagation();
-            }
-
-            const forceState = typeof eventOrState === "boolean" ? eventOrState : null;
             const shouldOpen = forceState === null ? !panel.classList.contains('active') : forceState;
             panel.classList.toggle('active', shouldOpen);
-            panel.hidden = !shouldOpen;
 
             if (shouldOpen) {
                 loadNotifications();
@@ -296,7 +320,6 @@
             const list = document.getElementById('notificationList');
             const dot = document.getElementById('notificationDot');
             if (!list || !dot) return;
-            const shouldToast = Boolean(window.__enableNotificationToasts);
 
             try {
                 const res = await fetch('/api/notifications');
@@ -304,12 +327,11 @@
 
                 const data = await res.json();
                 const notifications = data.notifications || [];
-                maybeShowNotificationToast(notifications, shouldToast);
 
                 dot.hidden = !(data.unread_count > 0);
 
                 if (!notifications.length) {
-                    list.innerHTML = '<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet.</p></div>';
+                    list.innerHTML = '<p class="notification-empty">No notifications yet.</p>';
                     return;
                 }
 
@@ -320,30 +342,10 @@
                     </button>
                 `).join('');
             } catch (error) {
-                list.innerHTML = '<div class="notification-empty"><i class="fas fa-user-lock"></i><p>Login to view notifications.</p></div>';
+                list.innerHTML = '<p class="notification-empty">Login to view notifications.</p>';
             }
         }
 
-
-
-        function maybeShowNotificationToast(notifications, shouldToast) {
-            if (!Array.isArray(notifications) || !notifications.length) return;
-
-            const latest = notifications[0];
-            const seenId = Number(sessionStorage.getItem('lastSeenNotificationId') || 0);
-
-            if (!seenId) {
-                sessionStorage.setItem('lastSeenNotificationId', latest.id);
-                return;
-            }
-
-            if (latest.id > seenId) {
-                sessionStorage.setItem('lastSeenNotificationId', latest.id);
-                if (shouldToast && !latest.is_read) {
-                    showNotification('success', latest.message || 'New update available');
-                }
-            }
-        }
 
         document.addEventListener('click', function (event) {
             const panel = document.getElementById('notificationPanel');
@@ -352,7 +354,6 @@
 
             if (panel.classList.contains('active') && !panel.contains(event.target) && !trigger.contains(event.target)) {
                 panel.classList.remove('active');
-                panel.hidden = true;
             }
         });
 
@@ -361,10 +362,8 @@
         // =====================================================
         document.addEventListener('DOMContentLoaded', function () {
             updateCartBadge();
-            window.__enableNotificationToasts = false;
             loadNotifications();
-            setTimeout(() => { window.__enableNotificationToasts = true; }, 2500);
-            setInterval(() => loadNotifications(), 12000);
+            setInterval(loadNotifications, 20000);
 
             // Initialize cart display if cart exists
             try {
