@@ -30,7 +30,7 @@ db.init_db()
 # =========================
 # CONFIGURATION
 # =========================
-ADMIN_CODE = (os.environ.get("ADMIN_CODE") or "TEMP-ADMIN-1234").strip()
+ADMIN_CODE = (os.environ.get("ADMIN_CODE")
 if not os.environ.get("ADMIN_CODE"):
     print("⚠️ ADMIN_CODE not set. Using temporary admin code: TEMP-ADMIN-1234 (set ADMIN_CODE in env for production).")
 TABLE_SESSION_EXPIRY_HOURS = 2
