@@ -28,12 +28,42 @@
             </h2>
         </div>
 
+        <!-- CENTER: CART (Always Visible on Mobile) -->
+        <div class="nav-center">
+            <a href="javascript:void(0)" onclick="toggleCart()" class="cart-icon-visible" title="Cart">
+                <i class="fas fa-cart-shopping" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <!-- RIGHT: Three Dots Menu -->
         <div class="nav-right">
             <button class="notification-btn" onclick="toggleNotifications()" aria-label="Notifications">
                 <i class="fas fa-bell"></i>
                 <span class="notification-dot" id="notificationDot" hidden></span>
             </button>
         </div>
+
+        <!-- Hidden Menu (Opens on 3 dots click) -->
+        <ul class="nav-links" id="navLinks">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/start"><i class="fas fa-utensils"></i> New Order</a></li>
+            <li><a href="/orders"><i class="fas fa-receipt"></i> History</a></li>
+            <li><a href="/about"><i class="fas fa-info-circle"></i> About</a></li>
+            <li><a href="/profile"><i class="fas fa-user-gear"></i> Profile & Settings</a></li>
+
+            {% if session.get("user") %}
+            {% if not session.get("is_admin") %}
+            <li><a href="/become-admin"><i class="fas fa-crown"></i> Become Admin</a></li>
+            {% else %}
+            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            {% endif %}
+            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            {% else %}
+            <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            <li><a href="/signup"><i class="fas fa-user-plus"></i> Signup</a></li>
+            {% endif %}
+        </ul>
+
     </nav>
 
     <div class="notification-panel" id="notificationPanel" aria-live="polite">
