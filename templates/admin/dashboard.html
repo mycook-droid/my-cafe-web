@@ -529,6 +529,7 @@
             <div class="order-item">
                 <div class="order-info">
                     <div class="order-id">Order #{{ order.id }}</div>
+                    <div class="order-time">Table: {{ order.table_id or "N/A" }}</div>
                     <div class="order-time">{{ order.created_at }}</div>
                 </div>
                 <div class="order-total">₹{{ order.total }}</div>

@@ -375,7 +375,7 @@
 
             <div class="customer-info">
                 <div class="customer-name">{{ order.name or 'Customer' }}</div>
-                <div style="font-size: 0.85rem; color: #d4b483;">{{ order.username }}</div>
+                <div style="font-size: 0.85rem; color: #d4b483;">{{ order.username }} · Table: {{ order.table_id or "N/A" }}</div>
             </div>
 
             <div class="items-list">
@@ -395,19 +395,15 @@
             <div class="order-total">₹{{ order.total }}</div>
 
             <div class="status-actions">
-                {% if order.status == 'pending' or not order.status %}
-                <button class="status-btn btn-preparing" onclick="updateStatus({{ order.id }}, 'preparing', this)">
-                    👨‍🍳 Start Preparing
+                <button class="status-btn btn-preparing {% if order.status == 'preparing' %}active{% endif %}" onclick="updateStatus({{ order.id }}, 'preparing', this)" {% if order.status in ['ready','completed'] %}disabled{% endif %}>
+                    👨‍🍳 Preparing
                 </button>
-                {% elif order.status == 'preparing' %}
-                <button class="status-btn btn-ready" onclick="updateStatus({{ order.id }}, 'ready', this)">
-                    ✅ Mark as Ready
+                <button class="status-btn btn-ready {% if order.status == 'ready' %}active{% endif %}" onclick="updateStatus({{ order.id }}, 'ready', this)" {% if order.status == 'completed' %}disabled{% endif %}>
+                    ✅ Ready
                 </button>
-                {% elif order.status == 'ready' %}
-                <button class="status-btn btn-complete" onclick="updateStatus({{ order.id }}, 'completed', this)">
-                    ✓ Complete Order
+                <button class="status-btn btn-complete {% if order.status == 'completed' %}active{% endif %}" onclick="updateStatus({{ order.id }}, 'completed', this)" {% if order.status == 'pending' %}disabled{% endif %}>
+                    ✓ Complete
                 </button>
-                {% endif %}
             </div>
         </div>
         {% endif %}

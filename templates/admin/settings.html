@@ -261,8 +261,8 @@
             <span class="info-value">{{ all_users|length }}</span>
         </div>
         <div class="info-row">
-            <span class="info-label">Admin Code</span>
-            <span class="info-value">MYCAFE2024</span>
+            <span class="info-label">Admin Code Status</span>
+            <span class="info-value">{{ "Configured" if admin_code_configured else "Not Configured" }}</span>
         </div>
     </div>
 </body>

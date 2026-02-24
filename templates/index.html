@@ -99,6 +99,10 @@
     .menu-item {
         transition: all 0.2s;
         cursor: default !important;
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.6rem;
     }
     
     .menu-item:hover {
@@ -448,3 +452,5 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 {% endblock %}
+
+<style>@media (max-width:768px){.menu-item .item-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.menu-item .qty{margin-left:auto}}</style>
