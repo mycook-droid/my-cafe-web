@@ -770,6 +770,9 @@ def become_admin():
 
     admin_code = request.form.get("admin_code", "").strip()
 
+    if not ADMIN_CODE:
+    return "Admin access not configured", 403
+
     if admin_code == ADMIN_CODE and os.environ.get("ADMIN_CODE"):
         db.make_user_admin(session.get("user"))
         session["is_admin"] = True
