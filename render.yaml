@@ -2,10 +2,12 @@ services:
   - type: web
     name: mycafe-app
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    buildCommand: python -m py_compile app.py db.py qr_generator.py migrate.py && pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: SECRET_KEY
         generateValue: true
+      - key: ADMIN_CODE
+        value: MYCAFE2024
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9

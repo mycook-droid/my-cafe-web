@@ -12,9 +12,12 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY")
-if not app.secret_key:
-    raise ValueError("Set SECRET_KEY in .env!")
+
+# Render/production may not provide a local .env file, so use safe fallbacks.
+# You should still set both variables in your hosting dashboard.
+app.secret_key = os.environ.get("SECRET_KEY") or "dev-secret-key-change-me"
+if app.secret_key == "dev-secret-key-change-me":
+    print("⚠️ SECRET_KEY not set. Using development fallback key.")
 
 # Initialize database on startup
 db.init_db()
@@ -22,9 +25,9 @@ db.init_db()
 # =========================
 # CONFIGURATION
 # =========================
-ADMIN_CODE = os.environ.get("ADMIN_CODE")
-if not ADMIN_CODE:
-    raise ValueError("Set ADMIN_CODE in .env!")
+ADMIN_CODE = os.environ.get("ADMIN_CODE") or "MYCAFE2024"
+if ADMIN_CODE == "MYCAFE2024":
+    print("⚠️ ADMIN_CODE not set. Using fallback admin code.")
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge
@@ -1288,27 +1291,27 @@ def update_order_status(order_id):
         return jsonify({'success': False, 'error': 'Invalid status'})
 
     try:
-    # Update status in database
-    conn = db.db_connection()  # ✅ Use helper function!
-    cur = conn.cursor()
-    cur.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
+        # Update status in database
+        conn = db.db_connection()
+        cur = conn.cursor()
+        cur.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
 
-    # If status is 'preparing', lock the order
-    if status == 'preparing':
-        cur.execute("""
-            INSERT OR IGNORE INTO order_locks (order_id, lock_reason, locked_by)
-            VALUES (?, ?, ?)
-        """, (order_id, "kitchen_started", "system"))
+        # If status is 'preparing', lock the order
+        if status == 'preparing':
+            cur.execute("""
+                INSERT OR IGNORE INTO order_locks (order_id, lock_reason, locked_by)
+                VALUES (?, ?, ?)
+            """, (order_id, "kitchen_started", "system"))
 
-        cur.execute("UPDATE orders SET locked = 1 WHERE id = ?", (order_id,))
+            cur.execute("UPDATE orders SET locked = 1 WHERE id = ?", (order_id,))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
-    return jsonify({'success': True, 'status': status})
+        return jsonify({'success': True, 'status': status})
     except Exception as e:
-    print(f"Error updating status: {e}")
-    return jsonify({'success': False, 'error': str(e)})
+        print(f"Error updating status: {e}")
+        return jsonify({'success': False, 'error': str(e)})
 
 @app.route("/admin/menu/toggle", methods=["POST"])
 @admin_required
