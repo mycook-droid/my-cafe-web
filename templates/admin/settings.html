@@ -214,8 +214,6 @@
         <p>Revoke your own admin access. You can request access again from your profile.</p>
         <button type="button" class="danger-btn" onclick="openRevokeModal()">Revoke My Admin Access</button>
     </div>
-</section>
-
 <div class="app-modal" id="revokeModal" hidden>
     <div class="app-modal-dialog compact">
         <h3>Revoke admin access?</h3>
@@ -237,6 +235,7 @@
 .admin-card.danger{border-color:rgba(255,77,77,.4)}
 .danger-btn{background:#ff4d4d;color:#fff;width:auto;padding:.7rem 1rem;letter-spacing:1px;font-size:16px}
 .app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:2000}
+.app-modal[hidden]{display:none !important}
 .app-modal-dialog{width:min(360px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
 .modal-actions{display:flex;justify-content:flex-end;gap:.6rem}.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);width:auto;padding:.6rem .9rem}
 @media (max-width:640px){.info-grid{grid-template-columns:1fr}}
@@ -256,4 +255,6 @@ async function confirmRevoke(){
     }
 }
 </script>
-{% endblock %}
+</body>
+
+</html>
