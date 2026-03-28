@@ -29,6 +29,9 @@
                     <div class="order-header">
                         <div>
                             <span class="order-id">#{{ o.id }}</span>
+                            {% if o.get('is_edited') %}
+                            <span class="edited-chip">Edited</span>
+                            {% endif %}
                             {% if o.get('table_id') %}
                             <span class="table-badge">{{ o.table_id }}</span>
                             {% endif %}
@@ -130,10 +133,10 @@
             <h3>Edit Order <span id="editOrderTitle"></span></h3>
             <button type="button" class="edit-order-close" onclick="closeEditModal()">×</button>
         </div>
-        <p class="edit-hint">Use one item per line, format: <strong>Item x Quantity</strong></p>
-        <textarea id="editOrderItems" rows="8" placeholder="Margherita x 2
-Cold Coffee x 1"></textarea>
+        <p class="edit-hint">Adjust quantities, remove items, and save. Editing is allowed for 3 minutes after order placement.</p>
+        <div id="editableItemsList" class="editable-items-list"></div>
         <div class="edit-order-actions">
+            <button type="button" class="btn-small" onclick="addAnotherItemRow()">Add Another Item</button>
             <button type="button" class="btn-small cancel-btn" onclick="closeEditModal()">Cancel</button>
             <button type="button" class="btn-small edit-btn" onclick="submitOrderEdit()">Save Changes</button>
         </div>
@@ -576,7 +579,13 @@ Cold Coffee x 1"></textarea>
     .edit-order-head { display: flex; justify-content: space-between; align-items: center; }
     .edit-order-close { border: 0; background: transparent; font-size: 1.4rem; cursor: pointer; }
     .edit-hint { color: var(--text-muted); margin: 0.4rem 0 0.75rem; }
-    #editOrderItems { width: 100%; border: 1px solid #ddd3c3; border-radius: 10px; padding: 0.75rem; font-family: inherit; }
+    .edited-chip { display: inline-block; margin-left: 0.4rem; font-size: 0.7rem; padding: 0.12rem 0.45rem; background: rgba(245,158,11,.15); color: #d97706; border-radius: 999px; border: 1px solid rgba(245,158,11,.35);}
+    .editable-items-list { display: grid; gap: 0.55rem; margin-bottom: 0.5rem; max-height: 45vh; overflow: auto; padding-right: 0.2rem; }
+    .editable-row { display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 0.45rem; align-items: center; }
+    .editable-row input, .editable-row select { border: 1px solid #ddd3c3; border-radius: 10px; padding: 0.45rem 0.55rem; background: #fff; }
+    .qty-btn, .delete-btn { width: 34px; height: 34px; border: 0; border-radius: 8px; cursor: pointer; }
+    .qty-btn { background: #f2ede4; color: #4b4234; }
+    .delete-btn { background: #fee2e2; color: #b91c1c; }
     .edit-order-actions { margin-top: 0.85rem; display: flex; justify-content: flex-end; gap: 0.6rem; }
 
     @media (max-width: 768px) {
@@ -626,17 +635,50 @@ Cold Coffee x 1"></textarea>
     }
 
     let activeEditOrderId = null;
+    const allMenuItems = {{ menu_items | tojson }};
 
     function openEditModal(orderId, currentItems) {
         activeEditOrderId = orderId;
         document.getElementById('editOrderTitle').textContent = `#${orderId}`;
-        document.getElementById('editOrderItems').value = currentItems || '';
-        document.getElementById('editOrderModal').hidden = false;
+        const list = document.getElementById('editableItemsList');
+        list.innerHTML = '';
+        const parsed = (currentItems || '').split('\n').map(line => {
+            if (!line.trim()) return null;
+            const [name, qtyPart] = line.split(' x ');
+            return { name: (name || '').trim(), quantity: Number((qtyPart || '1').trim()) || 1 };
+        }).filter(Boolean);
+        parsed.forEach(item => addEditableRow(item.name, item.quantity));
+        if (!parsed.length) addEditableRow('', 1);
+        const modal = document.getElementById('editOrderModal');
+        modal.hidden = false;
+        modal.classList.add('is-open');
     }
 
     function closeEditModal() {
-        document.getElementById('editOrderModal').hidden = true;
+        const modal = document.getElementById('editOrderModal');
+        modal.classList.remove('is-open');
+        modal.hidden = true;
         activeEditOrderId = null;
+    }
+    function addEditableRow(itemName = '', quantity = 1) {
+        const row = document.createElement('div');
+        row.className = 'editable-row';
+        row.innerHTML = `
+            <select class="item-select">
+                <option value="">Select item</option>
+                ${allMenuItems.map(item => `<option value="${item}" ${item === itemName ? 'selected' : ''}>${item}</option>`).join('')}
+            </select>
+            <button type="button" class="qty-btn" onclick="changeQty(this, -1)">−</button>
+            <input class="item-qty-input" type="number" min="1" value="${Math.max(1, Number(quantity) || 1)}">
+            <button type="button" class="qty-btn" onclick="changeQty(this, 1)">+</button>
+            <button type="button" class="delete-btn" onclick="this.closest('.editable-row').remove()"><i class="fas fa-trash"></i></button>
+        `;
+        document.getElementById('editableItemsList').appendChild(row);
+    }
+    function addAnotherItemRow() { addEditableRow('', 1); }
+    function changeQty(btn, delta) {
+        const input = btn.closest('.editable-row').querySelector('.item-qty-input');
+        input.value = Math.max(1, Number(input.value || 1) + delta);
     }
 
     function editOrder(orderId) {
@@ -644,7 +686,7 @@ Cold Coffee x 1"></textarea>
             .then(r => r.json())
             .then(data => {
                 if (!data.can_edit) {
-                    showNotification('error', 'Edit window expired. Orders can only be edited within 15 minutes.');
+                    showNotification('error', 'Edit window expired. Orders can only be edited within 3 minutes.');
                     return;
                 }
 
@@ -660,16 +702,20 @@ Cold Coffee x 1"></textarea>
     }
 
     function submitOrderEdit() {
-        const newItems = document.getElementById('editOrderItems').value.trim();
-        if (!activeEditOrderId || !newItems) {
-            showNotification('error', 'Please provide updated order items.');
+        const rows = Array.from(document.querySelectorAll('#editableItemsList .editable-row'));
+        const items = rows.map(row => ({
+            name: row.querySelector('.item-select')?.value || '',
+            quantity: Number(row.querySelector('.item-qty-input')?.value || 0)
+        })).filter(item => item.name && item.quantity > 0);
+        if (!activeEditOrderId || !items.length) {
+            showNotification('error', 'Please keep at least one valid item.');
             return;
         }
 
         fetch(`/api/order/${activeEditOrderId}/edit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: newItems })
+            body: JSON.stringify({ items })
         })
             .then(r => r.json())
             .then(result => {
@@ -722,6 +768,12 @@ Cold Coffee x 1"></textarea>
             });
         }
     }
+
+    document.getElementById('editOrderModal').addEventListener('click', (event) => {
+        if (event.target.id === 'editOrderModal') {
+            closeEditModal();
+        }
+    });
 </script>
 
 {% endblock %}

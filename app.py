@@ -36,7 +36,7 @@ if not os.environ.get("ADMIN_CODE"):
 TABLE_SESSION_EXPIRY_HOURS = 2
 TAX_RATE = 5.0  # 5% GST
 SERVICE_CHARGE_RATE = 10.0  # 10% service charge
-EDIT_WINDOW_MINUTES = 15
+EDIT_WINDOW_MINUTES = 3
 
 # =========================
 # MENU DATA
@@ -173,6 +173,30 @@ def parse_order_items(items_string):
             })
 
     return items
+
+def parse_items_payload(items_payload):
+    """Normalize editable items payload into (items_text, parsed_items)."""
+    parsed_items = []
+    if isinstance(items_payload, list):
+        for raw_item in items_payload:
+            if not isinstance(raw_item, dict):
+                continue
+            name = (raw_item.get("name") or "").strip()
+            quantity = int(raw_item.get("quantity") or 0)
+            if not name or quantity <= 0 or not item_exists(name):
+                continue
+            price = get_item_price(name)
+            parsed_items.append({
+                "name": name,
+                "quantity": quantity,
+                "price_per": price,
+                "total": price * quantity
+            })
+    elif isinstance(items_payload, str):
+        parsed_items = parse_order_items(items_payload)
+
+    items_text = "\n".join([f"{item['name']} x {item['quantity']}" for item in parsed_items])
+    return items_text, parsed_items
 
 # =========================
 # DECORATORS
@@ -375,9 +399,65 @@ def about():
 
 
 @app.route("/profile")
+@login_required
 def profile():
-    user = session.get("user")
+    user = db.get_user(session.get("user", ""))
     return render_template("profile.html", user=user)
+
+@app.route("/api/profile")
+@login_required
+def profile_api():
+    user = db.get_user(session.get("user", ""))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "username": user.get("username"),
+        "name": user.get("name"),
+        "email": user.get("email"),
+        "phone": user.get("phone"),
+        "created_at": user.get("created_at")
+    })
+
+@app.route("/profile/edit", methods=["POST"])
+@login_required
+def edit_profile():
+    user = db.get_user(session.get("user", ""))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip()
+    phone = request.form.get("phone", "").strip()
+
+    if not name or not email or not phone:
+        return jsonify({"error": "Name, email and phone are required"}), 400
+
+    db.update_user_profile(user["id"], name, email, phone)
+    return jsonify({"success": True, "message": "Profile updated successfully"})
+
+@app.route("/profile/change-password", methods=["POST"])
+@login_required
+def change_password():
+    user = db.get_user(session.get("user", ""))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    current_password = request.form.get("current_password", "")
+    new_password = request.form.get("new_password", "")
+    confirm_password = request.form.get("confirm_password", "")
+
+    if not current_password or not new_password or not confirm_password:
+        return jsonify({"error": "All password fields are required"}), 400
+    if new_password != confirm_password:
+        return jsonify({"error": "New password and confirmation do not match"}), 400
+    if len(new_password) < 8:
+        return jsonify({"error": "New password must be at least 8 characters"}), 400
+    if not check_password_hash(user["password"], current_password):
+        return jsonify({"error": "Current password is incorrect"}), 400
+
+    db.update_user_password(user["id"], generate_password_hash(new_password))
+    return jsonify({"success": True, "message": "Password changed successfully"})
 
 @app.route('/finish', methods=['POST'])
 def finish():
@@ -479,7 +559,8 @@ def view_orders():
         cafe = order.get("cafe_name", "MY CAFE")
         grouped_orders.setdefault(cafe, []).append(order)
 
-    return render_template("orders.html", grouped_orders=grouped_orders, menu=menu_card)
+    menu_items = [item for category in menu_card.values() for item in category.keys()]
+    return render_template("orders.html", grouped_orders=grouped_orders, menu=menu_card, menu_items=menu_items)
 
 @app.route("/api/order/<int:order_id>/edit-window")
 @login_required
@@ -518,14 +599,12 @@ def edit_order_api(order_id):
     if user and order.get("user_id") != user["id"]:
         return jsonify({"error": "Not authorized"}), 403
 
-    data = request.json
-    new_items = data.get("items")
-
-    if not new_items:
+    data = request.json or {}
+    items_payload = data.get("items")
+    new_items, items_list = parse_items_payload(items_payload)
+    if not items_list:
         return jsonify({"error": "No items provided"}), 400
 
-    # Parse and calculate new total
-    items_list = parse_order_items(new_items)
     total = sum(item["total"] for item in items_list)
 
     # Update order in database
@@ -535,11 +614,12 @@ def edit_order_api(order_id):
     try:
         cur.execute("""
             UPDATE orders 
-            SET items = ?, total = ?
+            SET items = ?, total = ?, is_edited = 1, edited_at = CURRENT_TIMESTAMP
             WHERE id = ?
         """, (new_items, total, order_id))
 
         conn.commit()
+        db.record_order_edit(order_id, user["id"], order.get("items", ""), new_items, order.get("total", 0), total)
 
         db.create_notification(order_id, order['user_id'],
                              order.get('table_id'),
@@ -892,8 +972,41 @@ def admin_analytics():
 @admin_required
 def admin_settings():
     user = db.get_user(session.get("user"))
-    all_users = db.get_all_users()
-    return render_template("admin/settings.html", user=user, all_users=all_users, admin_code_configured=bool(ADMIN_CODE))
+    cafe_settings = db.get_cafe_settings()
+    return render_template(
+        "admin/settings.html",
+        user=user,
+        cafe_settings=cafe_settings,
+        admin_code_configured=bool(ADMIN_CODE)
+    )
+
+@app.route("/admin/cafe-settings", methods=["GET", "POST"])
+@admin_required
+def admin_cafe_settings():
+    user = db.get_user(session.get("user", ""))
+    if not user:
+        return redirect("/login")
+
+    if request.method == "POST":
+        cafe_name = request.form.get("cafe_name", "").strip() or "MY CAFE"
+        address = request.form.get("address", "").strip()
+        phone = request.form.get("phone", "").strip()
+        logo_url = request.form.get("logo_url", "").strip()
+        db.update_cafe_settings(cafe_name, address, phone, logo_url, user["id"])
+        return redirect("/admin/settings?saved=1")
+
+    return render_template("admin/cafe_settings.html", user=user, cafe_settings=db.get_cafe_settings())
+
+@app.route("/admin/revoke-access", methods=["POST"])
+@admin_required
+def revoke_admin_access():
+    user = db.get_user(session.get("user", ""))
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    db.revoke_user_admin(user["username"])
+    session["is_admin"] = False
+    return jsonify({"success": True, "message": "Admin access revoked"})
 
 # =========================
 # ADMIN API ENDPOINTS - PART 3/3
@@ -1535,7 +1648,7 @@ def before_request():
         cur = conn.cursor()
 
         # Get orders that are not locked and placed recently (within edit window)
-        # In your original code, the edit window is 15 minutes
+        # Use configured edit window duration
         time_limit = datetime.now() - timedelta(minutes=EDIT_WINDOW_MINUTES)
 
         cur.execute("""

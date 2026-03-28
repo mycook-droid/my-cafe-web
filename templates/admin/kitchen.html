@@ -194,6 +194,16 @@
             background-clip: text;
             color: transparent;
         }
+        .edited-flag {
+            margin-left: 0.4rem;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 999px;
+            border: 1px solid rgba(245, 158, 11, 0.5);
+            background: rgba(245, 158, 11, 0.16);
+            color: #f59e0b;
+            vertical-align: middle;
+        }
 
         .order-time {
             font-size: 0.85rem;
@@ -367,7 +377,7 @@
         {% if order.status != 'completed' %}
         <div class="order-card {{ order.status or 'pending' }}" data-status="{{ order.status or 'pending' }}">
             <div class="order-header">
-                <div class="order-number">Order #{{ order.id }}</div>
+                <div class="order-number">Order #{{ order.id }}{% if order.is_edited %}<span class="edited-flag">Edited</span>{% endif %}</div>
                 <div class="order-time">
                     <span class="time-badge">{{ order.created_at }}</span>
                 </div>

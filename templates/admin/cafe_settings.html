@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="admin-settings-page">
+    <div class="admin-head">
+        <h1>Cafe Information</h1>
+        <p>Update the business details shown to staff/admin users.</p>
+    </div>
+
+    <form class="admin-card" method="POST" action="/admin/cafe-settings">
+        <label>Cafe Name</label>
+        <input type="text" name="cafe_name" value="{{ cafe_settings.cafe_name or '' }}" required>
+
+        <label>Address</label>
+        <textarea name="address" rows="3">{{ cafe_settings.address or '' }}</textarea>
+
+        <label>Phone</label>
+        <input type="text" name="phone" value="{{ cafe_settings.phone or '' }}">
+
+        <label>Logo URL</label>
+        <input type="url" name="logo_url" value="{{ cafe_settings.logo_url or '' }}">
+
+        <div class="actions">
+            <a href="/admin/settings" class="ghost-link">Cancel</a>
+            <button type="submit">Save Cafe Info</button>
+        </div>
+    </form>
+</section>
+
+<style>
+.admin-settings-page{display:grid;gap:1rem}.admin-head p{color:var(--muted)}
+.admin-card{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:1rem;display:grid;gap:.6rem}
+.actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:.5rem}
+.actions button{width:auto;padding:.7rem 1rem;letter-spacing:1px;font-size:16px}
+.ghost-link{display:inline-flex;align-items:center;padding:.6rem .9rem;border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none}
+</style>
+{% endblock %}

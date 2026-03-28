@@ -179,92 +179,81 @@
         <a href="/admin" class="back-btn">← Back to Dashboard</a>
     </div>
 
-    <div class="info-card">
-        <h3>👤 Current Admin</h3>
-        <div class="info-row">
-            <span class="info-label">Username</span>
-            <span class="info-value">{{ user.username }}</span>
+    <div class="admin-card">
+        <div class="row-between">
+            <h2>Cafe Info</h2>
+            <a class="small-link" href="/admin/cafe-settings">Edit</a>
         </div>
-        <div class="info-row">
-            <span class="info-label">Name</span>
-            <span class="info-value">{{ user.name or 'Not Set' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Email</span>
-            <span class="info-value">{{ user.email or 'Not Set' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Phone</span>
-            <span class="info-value">{{ user.phone or 'Not Set' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Account Created</span>
-            <span class="info-value">{{ user.created_at }}</span>
+        <div class="info-grid">
+            <div><span>Name</span><strong>{{ cafe_settings.cafe_name or 'MY CAFE' }}</strong></div>
+            <div><span>Phone</span><strong>{{ cafe_settings.phone or '-' }}</strong></div>
+            <div><span>Address</span><strong>{{ cafe_settings.address or '-' }}</strong></div>
+            <div><span>Logo URL</span><strong>{{ cafe_settings.logo_url or '-' }}</strong></div>
         </div>
     </div>
 
-    <div class="settings-section">
-        <h2>👥 All Users ({{ all_users|length }})</h2>
-        
-        {% if all_users %}
-        <div style="overflow-x: auto;">
-            <table class="user-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Role</th>
-                        <th>Joined</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in all_users %}
-                    <tr>
-                        <td>{{ u.id }}</td>
-                        <td>{{ u.username }}</td>
-                        <td>{{ u.name or '-' }}</td>
-                        <td>{{ u.email or '-' }}</td>
-                        <td>{{ u.phone or '-' }}</td>
-                        <td>
-                            {% if u.is_admin == 1 %}
-                            <span class="admin-badge">👑 ADMIN</span>
-                            {% else %}
-                            <span class="user-badge">USER</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ u.created_at }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p style="text-align: center; color: #d4b483; padding: 2rem;">No users found</p>
-        {% endif %}
-    </div>
-
-    <div class="settings-section">
-        <h2>ℹ️ System Information</h2>
-        <div class="info-row">
-            <span class="info-label">Application Name</span>
-            <span class="info-value">MY CAFE</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Version</span>
-            <span class="info-value">1.0.0</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Total Users</span>
-            <span class="info-value">{{ all_users|length }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Admin Code Status</span>
-            <span class="info-value">{{ "Configured" if admin_code_configured else "Not Configured" }}</span>
+    <div class="admin-card">
+        <h2>Current Admin</h2>
+        <div class="info-grid">
+            <div><span>Username</span><strong>{{ user.username }}</strong></div>
+            <div><span>Name</span><strong>{{ user.name or '-' }}</strong></div>
         </div>
     </div>
-</body>
 
-</html>
+    <div class="admin-card">
+        <h2>Quick Links</h2>
+        <div class="links">
+            <a href="/admin/tax-settings">Tax Settings</a>
+            <a href="/admin/menu">Menu Management</a>
+            <a href="/admin/orders">Kitchen Display</a>
+        </div>
+    </div>
+
+    <div class="admin-card danger">
+        <h2>Danger Zone</h2>
+        <p>Revoke your own admin access. You can request access again from your profile.</p>
+        <button type="button" class="danger-btn" onclick="openRevokeModal()">Revoke My Admin Access</button>
+    </div>
+</section>
+
+<div class="app-modal" id="revokeModal" hidden>
+    <div class="app-modal-dialog compact">
+        <h3>Revoke admin access?</h3>
+        <p>This action removes admin rights from your current account.</p>
+        <div class="modal-actions">
+            <button type="button" class="ghost" onclick="closeRevokeModal()">Cancel</button>
+            <button type="button" class="danger-btn" onclick="confirmRevoke()">Yes, Revoke</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-settings-page{display:grid;gap:1rem}.admin-head p{color:var(--muted)}
+.admin-card{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:1rem}
+.row-between{display:flex;justify-content:space-between;align-items:center}.small-link{color:var(--accent)}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin-top:.75rem}
+.info-grid span{display:block;color:var(--muted);font-size:.8rem}
+.links{display:grid;gap:.5rem}.links a{padding:.65rem;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text)}
+.admin-card.danger{border-color:rgba(255,77,77,.4)}
+.danger-btn{background:#ff4d4d;color:#fff;width:auto;padding:.7rem 1rem;letter-spacing:1px;font-size:16px}
+.app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:2000}
+.app-modal-dialog{width:min(360px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:.6rem}.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);width:auto;padding:.6rem .9rem}
+@media (max-width:640px){.info-grid{grid-template-columns:1fr}}
+</style>
+
+<script>
+function openRevokeModal(){ document.getElementById('revokeModal').hidden = false; }
+function closeRevokeModal(){ document.getElementById('revokeModal').hidden = true; }
+async function confirmRevoke(){
+    const res = await fetch('/admin/revoke-access', { method:'POST' });
+    const data = await res.json();
+    if(data.success){
+        showNotification('success', data.message || 'Admin access revoked');
+        setTimeout(() => window.location.href = '/profile', 600);
+    }else{
+        showNotification('error', data.error || 'Unable to revoke admin access');
+    }
+}
+</script>
+{% endblock %}
