@@ -2,16 +2,38 @@
 {% block content %}
 <section class="profile-screen">
     <div class="profile-header">
-        <h1>Settings</h1>
-        <p>Control your account and app preferences</p>
+        <h1>Profile & Settings</h1>
+        <p>Manage your account, security, and preferences.</p>
+    </div>
+
+    <div class="profile-card" id="profileCard">
+        <div class="avatar" id="profileAvatar">U</div>
+        <div class="profile-meta">
+            <h2 id="profileName">Loading...</h2>
+            <p id="profileEmail">-</p>
+            <p id="profilePhone">-</p>
+            <small id="profileSince">Member since -</small>
+        </div>
+        <button class="mini-btn" type="button" onclick="openModal('editProfileModal')">
+            <i class="fas fa-pen"></i> Edit
+        </button>
+    </div>
+
+    <div class="stats-row" id="profileStats">
+        <div class="stat-box"><span>Total Orders</span><strong id="statOrders">0</strong></div>
+        <div class="stat-box"><span>Total Spent</span><strong id="statSpent">₹0</strong></div>
+        <div class="stat-box"><span>Favorite Cafe</span><strong id="statCafe">-</strong></div>
     </div>
 
     <div class="settings-card">
+        <button class="settings-row" type="button" onclick="openModal('changePasswordModal')">
+            <i class="fas fa-key"></i><span>Change Password</span><i class="fas fa-chevron-right"></i>
+        </button>
         <a class="settings-row" href="/terms"><i class="fas fa-file-signature"></i><span>Terms & Conditions</span><i class="fas fa-chevron-right"></i></a>
         <a class="settings-row" href="/privacy"><i class="fas fa-user-shield"></i><span>Privacy Policy</span><i class="fas fa-chevron-right"></i></a>
         <a class="settings-row" href="https://mycook-droid.github.io/Zishan_droid/" target="_blank" rel="noopener"><i class="fas fa-id-card"></i><span>Developer Details</span><i class="fas fa-chevron-right"></i></a>
         <a class="settings-row" href="/about"><i class="fas fa-circle-info"></i><span>About Us</span><i class="fas fa-chevron-right"></i></a>
-        <a class="settings-row" href="{{ "/admin/settings" if session.get('is_admin') else "/become-admin" }}"><i class="fas fa-sliders"></i><span>System Settings</span><i class="fas fa-chevron-right"></i></a>
+        <a class="settings-row" href="{{ '/admin/settings' if session.get('is_admin') else '/become-admin' }}"><i class="fas fa-sliders"></i><span>System Settings</span><i class="fas fa-chevron-right"></i></a>
     </div>
 
     {% if session.get('is_admin') %}
@@ -22,13 +44,148 @@
     </div>
     {% endif %}
 
-    {% if user %}
-    <div class="profile-user-pill">
-        Logged in as <strong>{{ user.name or user.username }}</strong>
-    </div>
     <div class="settings-card">
-        <a class="settings-row" href="/logout"><i class="fas fa-right-from-bracket"></i><span>Logout</span><i class="fas fa-chevron-right"></i></a>
+        <button class="settings-row danger" type="button" onclick="openModal('logoutConfirmModal')">
+            <i class="fas fa-right-from-bracket"></i><span>Logout</span><i class="fas fa-chevron-right"></i>
+        </button>
     </div>
-    {% endif %}
 </section>
+
+<div class="app-modal" id="editProfileModal" hidden>
+    <div class="app-modal-dialog">
+        <div class="modal-head"><h3>Edit Profile</h3><button type="button" onclick="closeModal('editProfileModal')">×</button></div>
+        <form id="editProfileForm" onsubmit="submitProfileEdit(event)">
+            <label>Name</label>
+            <input type="text" id="editName" name="name" required>
+            <label>Email</label>
+            <input type="email" id="editEmail" name="email" required>
+            <label>Phone</label>
+            <input type="text" id="editPhone" name="phone" required>
+            <div class="modal-actions">
+                <button type="button" class="ghost" onclick="closeModal('editProfileModal')">Cancel</button>
+                <button type="submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="app-modal" id="changePasswordModal" hidden>
+    <div class="app-modal-dialog">
+        <div class="modal-head"><h3>Change Password</h3><button type="button" onclick="closeModal('changePasswordModal')">×</button></div>
+        <form id="changePasswordForm" onsubmit="submitPasswordChange(event)">
+            <label>Current Password</label>
+            <input type="password" name="current_password" required>
+            <label>New Password</label>
+            <input type="password" name="new_password" minlength="8" required>
+            <label>Confirm Password</label>
+            <input type="password" name="confirm_password" minlength="8" required>
+            <div class="modal-actions">
+                <button type="button" class="ghost" onclick="closeModal('changePasswordModal')">Cancel</button>
+                <button type="submit">Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="app-modal" id="logoutConfirmModal" hidden>
+    <div class="app-modal-dialog compact">
+        <h3>Logout</h3>
+        <p>Are you sure you want to logout?</p>
+        <div class="modal-actions">
+            <button type="button" class="ghost" onclick="closeModal('logoutConfirmModal')">Stay</button>
+            <button type="button" onclick="window.location.href='/logout'">Logout</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-card{display:flex;align-items:center;gap:1rem;padding:1rem;border:1px solid var(--border);border-radius:16px;background:var(--surface);margin-bottom:1rem}
+.avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--accent-2);color:var(--accent);font-size:1.5rem;font-weight:700}
+.profile-meta h2{margin:0}.profile-meta p,.profile-meta small{margin:0;color:var(--muted)}
+.mini-btn{width:auto;padding:.6rem 1rem;margin-left:auto}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
+.stat-box{border:1px solid var(--border);border-radius:12px;padding:.75rem;background:var(--surface-2);text-align:center}
+.stat-box span{display:block;color:var(--muted);font-size:.8rem}.stat-box strong{font-size:1rem}
+.settings-row{display:flex;align-items:center;gap:.75rem;width:100%;background:transparent;border:0;color:inherit;text-decoration:none;padding:.85rem}
+.settings-row i:last-child{margin-left:auto}.settings-row.danger{color:#ff7a7a}
+.app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:1rem;z-index:2000}
+.app-modal[hidden]{display:none !important}
+.app-modal-dialog{width:min(460px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
+.app-modal-dialog.compact{width:min(360px,100%)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.modal-head button{width:auto;background:transparent;color:var(--text);font-size:1.4rem;padding:0 .4rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem}
+.modal-actions button{width:auto;padding:.6rem 1rem;letter-spacing:1px;font-size:16px}
+.modal-actions .ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+@media (max-width:640px){.stats-row{grid-template-columns:1fr}.profile-card{align-items:flex-start;flex-wrap:wrap}.mini-btn{margin-left:0}}
+</style>
+
+<script>
+let cachedProfile = null;
+
+function openModal(id){document.getElementById(id).hidden = false;}
+function closeModal(id){document.getElementById(id).hidden = true;}
+
+async function loadProfile(){
+    const res = await fetch('/api/profile');
+    if(!res.ok) return;
+    const data = await res.json();
+    cachedProfile = data;
+    document.getElementById('profileName').textContent = data.name || data.username || 'User';
+    document.getElementById('profileEmail').textContent = data.email || '-';
+    document.getElementById('profilePhone').textContent = data.phone || '-';
+    document.getElementById('profileSince').textContent = `Member since ${data.created_at || '-'}`;
+    document.getElementById('profileAvatar').textContent = (data.name || data.username || 'U').charAt(0).toUpperCase();
+    document.getElementById('editName').value = data.name || '';
+    document.getElementById('editEmail').value = data.email || '';
+    document.getElementById('editPhone').value = data.phone || '';
+}
+
+async function loadProfileStats(){
+    const res = await fetch('/api/my-orders');
+    if(!res.ok) return;
+    const orders = await res.json();
+    const totalOrders = orders.length;
+    const totalSpent = orders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+    const cafeFreq = {};
+    orders.forEach(o => { const cafe = o.cafe_name || 'MY CAFE'; cafeFreq[cafe] = (cafeFreq[cafe] || 0) + 1; });
+    const favoriteCafe = Object.keys(cafeFreq).sort((a,b)=>cafeFreq[b]-cafeFreq[a])[0] || '-';
+    document.getElementById('statOrders').textContent = totalOrders;
+    document.getElementById('statSpent').textContent = `₹${totalSpent}`;
+    document.getElementById('statCafe').textContent = favoriteCafe;
+}
+
+async function submitProfileEdit(event){
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const res = await fetch('/profile/edit', { method:'POST', body: formData });
+    const result = await res.json();
+    if(result.success){
+        closeModal('editProfileModal');
+        showNotification('success', result.message || 'Profile updated');
+        await loadProfile();
+    }else{
+        showNotification('error', result.error || 'Could not update profile');
+    }
+}
+
+async function submitPasswordChange(event){
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const res = await fetch('/profile/change-password', { method:'POST', body: formData });
+    const result = await res.json();
+    if(result.success){
+        closeModal('changePasswordModal');
+        event.target.reset();
+        showNotification('success', result.message || 'Password changed');
+    }else{
+        showNotification('error', result.error || 'Could not change password');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadProfile();
+    loadProfileStats();
+});
+</script>
 {% endblock %}

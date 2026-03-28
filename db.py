@@ -88,7 +88,7 @@ def can_edit_order(order_id):
     if order['locked'] == 1:
         return False
     
-    # Check edit window (15 minutes by default)
+    # Check edit window
     if order['edit_until']:
         edit_until = datetime.strptime(order['edit_until'], "%Y-%m-%d %H:%M:%S")
         if datetime.now() > edit_until:
@@ -398,7 +398,7 @@ def save_order_with_features(user_id, items, total, cafe_name="MY CAFE",
 
     try:
         placed_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        edit_until = (datetime.now() + timedelta(minutes=15)).strftime("%Y-%m-%d %H:%M:%S")
+        edit_until = (datetime.now() + timedelta(minutes=3)).strftime("%Y-%m-%d %H:%M:%S")
         
         cursor.execute("""
             INSERT INTO orders 
@@ -485,6 +485,15 @@ def init_db():
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     """)
+    # Safe schema upgrades for existing databases
+    for alter_sql in [
+        "ALTER TABLE orders ADD COLUMN is_edited INTEGER DEFAULT 0",
+        "ALTER TABLE orders ADD COLUMN edited_at TIMESTAMP"
+    ]:
+        try:
+            cur.execute(alter_sql)
+        except sqlite3.OperationalError:
+            pass
 
     # Item availability table
     cur.execute("""
@@ -596,10 +605,40 @@ def init_db():
         CONSTRAINT one_row CHECK (id = 1)
     )
     """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS cafe_settings (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        cafe_name TEXT DEFAULT 'MY CAFE',
+        address TEXT DEFAULT '',
+        phone TEXT DEFAULT '',
+        logo_url TEXT DEFAULT '',
+        updated_by INTEGER,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT one_cafe_row CHECK (id = 1),
+        FOREIGN KEY(updated_by) REFERENCES users(id)
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS order_edits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER NOT NULL,
+        edited_by_user_id INTEGER,
+        previous_items TEXT,
+        new_items TEXT,
+        previous_total REAL,
+        new_total REAL,
+        edited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(order_id) REFERENCES orders(id),
+        FOREIGN KEY(edited_by_user_id) REFERENCES users(id)
+    )
+    """)
 
 # Insert default settings if not exists
     cur.execute("""
         INSERT OR IGNORE INTO tax_settings (id) VALUES (1)
+    """)
+    cur.execute("""
+        INSERT OR IGNORE INTO cafe_settings (id) VALUES (1)
     """)
 
     conn.commit()
@@ -709,6 +748,89 @@ def make_user_admin(username):
     conn.commit()
     conn.close()
     print(f"✅ {username} is now an admin")
+
+def revoke_user_admin(username):
+    """Revoke admin access from a user"""
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET is_admin = 0 WHERE username = ?", (username,))
+    conn.commit()
+    conn.close()
+    return True
+
+def update_user_profile(user_id, name, email, phone):
+    """Update editable profile fields for a user"""
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE users
+        SET name = ?, email = ?, phone = ?
+        WHERE id = ?
+    """, (name, email, phone, user_id))
+    conn.commit()
+    updated = cursor.rowcount > 0
+    conn.close()
+    return updated
+
+def update_user_password(user_id, hashed_password):
+    """Update password hash for a user"""
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE users
+        SET password = ?
+        WHERE id = ?
+    """, (hashed_password, user_id))
+    conn.commit()
+    updated = cursor.rowcount > 0
+    conn.close()
+    return updated
+
+def get_cafe_settings():
+    """Get singleton cafe settings row"""
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cafe_settings WHERE id = 1")
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else {
+        "id": 1,
+        "cafe_name": "MY CAFE",
+        "address": "",
+        "phone": "",
+        "logo_url": ""
+    }
+
+def update_cafe_settings(cafe_name, address, phone, logo_url, updated_by=None):
+    """Upsert cafe settings"""
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO cafe_settings (id, cafe_name, address, phone, logo_url, updated_by, updated_at)
+        VALUES (1, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(id) DO UPDATE SET
+            cafe_name = excluded.cafe_name,
+            address = excluded.address,
+            phone = excluded.phone,
+            logo_url = excluded.logo_url,
+            updated_by = excluded.updated_by,
+            updated_at = CURRENT_TIMESTAMP
+    """, (cafe_name, address, phone, logo_url, updated_by))
+    conn.commit()
+    conn.close()
+    return True
+
+def record_order_edit(order_id, edited_by_user_id, previous_items, new_items, previous_total, new_total):
+    """Audit order item edits for kitchen/admin tracking"""
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO order_edits (order_id, edited_by_user_id, previous_items, new_items, previous_total, new_total)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (order_id, edited_by_user_id, previous_items, new_items, previous_total, new_total))
+    conn.commit()
+    conn.close()
+    return True
 
 # =====================
 # EXISTING ORDER FUNCTIONS (updated)
