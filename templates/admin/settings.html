@@ -1,492 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block content %}
+<section class="admin-settings-page">
+    <div class="admin-head">
+        <h1>Admin Settings</h1>
+        <p>Control cafe configuration safely without exposing customer data.</p>
+    </div>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Settings - MY CAFE</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/admin.css">
-    <style>
-500;600;700;800&display=swap');
+    <div class="admin-card">
+        <div class="row-between">
+            <h2>Cafe Info</h2>
+            <a class="small-link" href="/admin/cafe-settings">Edit</a>
+        </div>
+        <div class="info-grid">
+            <div><span>Name</span><strong>{{ cafe_settings.cafe_name or 'MY CAFE' }}</strong></div>
+            <div><span>Phone</span><strong>{{ cafe_settings.phone or '-' }}</strong></div>
+            <div><span>Address</span><strong>{{ cafe_settings.address or '-' }}</strong></div>
+            <div><span>Logo URL</span><strong>{{ cafe_settings.logo_url or '-' }}</strong></div>
+        </div>
+    </div>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <div class="admin-card">
+        <h2>Current Admin</h2>
+        <div class="info-grid">
+            <div><span>Username</span><strong>{{ user.username }}</strong></div>
+            <div><span>Name</span><strong>{{ user.name or '-' }}</strong></div>
+        </div>
+    </div>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a1200 0%, #2d1b00 100%);
-            color: #fff8eb;
-            padding: 1rem;
-            min-height: 100vh;
-        }
+    <div class="admin-card">
+        <h2>Quick Links</h2>
+        <div class="links">
+            <a href="/admin/tax-settings">Tax Settings</a>
+            <a href="/admin/menu">Menu Management</a>
+            <a href="/admin/orders">Kitchen Display</a>
+        </div>
+    </div>
 
-        .header {
-            background: rgba(255, 157, 0, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 157, 0, 0.2);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
+    <div class="admin-card danger">
+        <h2>Danger Zone</h2>
+        <p>Revoke your own admin access. You can request access again from your profile.</p>
+        <button type="button" class="danger-btn" onclick="openRevokeModal()">Revoke My Admin Access</button>
+    </div>
+</section>
 
-        .header h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #ff9d00, #ff6b00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+<div class="app-modal" id="revokeModal" hidden>
+    <div class="app-modal-dialog compact">
+        <h3>Revoke admin access?</h3>
+        <p>This action removes admin rights from your current account.</p>
+        <div class="modal-actions">
+            <button type="button" class="ghost" onclick="closeRevokeModal()">Cancel</button>
+            <button type="button" class="danger-btn" onclick="confirmRevoke()">Yes, Revoke</button>
+        </div>
+    </div>
+</div>
 
-        .back-btn {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 157, 0, 0.1);
-            color: #ff9d00;
-            border: 1px solid rgba(255, 157, 0, 0.3);
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 157, 0, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .settings-section {
-            background: rgba(255, 248, 235, 0.08);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 157, 0, 0.2);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .settings-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: #fff8eb;
-        }
-
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .user-table th {
-            background: rgba(255, 157, 0, 0.1);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #ff9d00;
-            border-bottom: 1px solid rgba(255, 157, 0, 0.2);
-        }
-
-        .user-table td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 157, 0, 0.1);
-            color: #fff8eb;
-        }
-
-        .user-table tr:hover {
-            background: rgba(255, 157, 0, 0.05);
-        }
-
-        .admin-badge {
-            background: linear-gradient(135deg, #ff9d00, #ff6b00);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .user-badge {
-            background: rgba(100, 116, 139, 0.2);
-            color: #94a3b8;
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .info-card {
-            background: rgba(255, 248, 235, 0.08);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 157, 0, 0.2);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .info-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: #ff9d00;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(255, 157, 0, 0.1);
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            color: #d4b483;
-            font-weight: 500;
-        }
-
-        .info-value {
-            color: #fff8eb;
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .user-table {
-                font-size: 0.9rem;
-            }
-
-            .user-table th,
-            .user-table td {
-                padding: 0.75rem 0.5rem;
-            }
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-
-    <style>
-:root {
-  --bg: #070809;
-  --bg-2: #0f1113;
-  --surface: rgba(255,255,255,0.04);
-  --surface-2: rgba(255,255,255,0.07);
-  --border: rgba(255,255,255,0.08);
-  --border-hi: rgba(232,255,0,0.35);
-  --text: #eef1e8;
-  --muted: #6b7267;
-  --accent: #d6f500;
-  --accent-2: rgba(214,245,0,0.12);
-  --green: #00e87a;
-  --red: #ff4d4d;
-}
-
-body {
-  font-family: 'Space Grotesk', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.6;
-}
-
-main {
-  max-width: min(100%, 600px);
-  margin: 0 auto;
-  padding: 20px 16px;
-  position: relative;
-  z-index: 1;
-}
-
-label,
-small,
-.badge,
-.bottom-nav a,
-.mobile-app-nav a,
-.mobile-app-nav .app-nav-btn,
-.nav-tab,
-.tab,
-.meta,
-[class*='meta'] {
-  font-family: 'Space Mono', monospace;
-  text-transform: uppercase;
-}
-
-h1,
-h2,
-.hero-title,
-.display,
-[class*='hero'] h1,
-[class*='hero'] h2 {
-  font-family: 'Bebas Neue', sans-serif;
-}
-
-.card,
-.panel,
-section,
-.split-card,
-.preset-card,
-.exercise-item,
-[class*='card'] {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  transition: border-color 0.2s, transform 0.18s;
-}
-
-.card:hover,
-.panel:hover,
-section:hover,
-.split-card:hover,
-.preset-card:hover,
-.exercise-item:hover,
-[class*='card']:hover {
-  border-color: var(--border-hi);
-  transform: translateY(-2px);
-}
-
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-main > section,
-main > div {
-  animation: cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
-}
-
-main > section:nth-child(1), main > div:nth-child(1) { animation-delay: 0s; }
-main > section:nth-child(2), main > div:nth-child(2) { animation-delay: 0.07s; }
-main > section:nth-child(3), main > div:nth-child(3) { animation-delay: 0.14s; }
-main > section:nth-child(4), main > div:nth-child(4) { animation-delay: 0.21s; }
-
-.skeleton {
-  border-radius: 14px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.bottom-nav,
-.mobile-app-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: rgba(7,8,9,0.92);
-  backdrop-filter: blur(28px);
-  border-top: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
-}
-
-.bottom-nav a,
-.mobile-app-nav a,
-.mobile-app-nav .app-nav-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 4px;
-  border-radius: 14px;
-  color: var(--muted);
-  text-decoration: none;
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: color 0.2s, background 0.2s;
-}
-
-.bottom-nav a svg,
-.mobile-app-nav a svg,
-.mobile-app-nav .app-nav-btn svg {
-  width: 22px;
-  height: 22px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.bottom-nav a.active,
-.mobile-app-nav a.active,
-.mobile-app-nav .app-nav-btn.active {
-  color: var(--accent);
-  background: var(--accent-2);
-}
-
-button,
-.btn-primary,
-input[type='submit'],
-input[type='button'] {
-  background: var(--accent);
-  color: #080a05;
-  border: none;
-  border-radius: 14px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
-  letter-spacing: 3px;
-  padding: 14px;
-  width: 100%;
-  cursor: pointer;
-  transition: filter 0.2s, transform 0.12s;
-}
-
-button:hover,
-.btn-primary:hover,
-input[type='submit']:hover,
-input[type='button']:hover {
-  filter: brightness(1.08);
-}
-
-button:active,
-.btn-primary:active,
-input[type='submit']:active,
-input[type='button']:active {
-  transform: scale(0.97);
-}
-
-input,
-textarea,
-select {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 15px;
-  padding: 13px 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--border-hi);
-  box-shadow: 0 0 0 3px rgba(214,245,0,0.08);
-}
+<style>
+.admin-settings-page{display:grid;gap:1rem}.admin-head p{color:var(--muted)}
+.admin-card{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:1rem}
+.row-between{display:flex;justify-content:space-between;align-items:center}.small-link{color:var(--accent)}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin-top:.75rem}
+.info-grid span{display:block;color:var(--muted);font-size:.8rem}
+.links{display:grid;gap:.5rem}.links a{padding:.65rem;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text)}
+.admin-card.danger{border-color:rgba(255,77,77,.4)}
+.danger-btn{background:#ff4d4d;color:#fff;width:auto;padding:.7rem 1rem;letter-spacing:1px;font-size:16px}
+.app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:2000}
+.app-modal-dialog{width:min(360px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:.6rem}.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);width:auto;padding:.6rem .9rem}
+@media (max-width:640px){.info-grid{grid-template-columns:1fr}}
 </style>
-</head>
 
-<body>
-    <div class="header">
-        <h1>⚙️ Settings</h1>
-        <a href="/admin" class="back-btn">← Back to Dashboard</a>
-    </div>
-
-    <div class="info-card">
-        <h3>👤 Current Admin</h3>
-        <div class="info-row">
-            <span class="info-label">Username</span>
-            <span class="info-value">{{ user.username }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Name</span>
-            <span class="info-value">{{ user.name or 'Not Set' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Email</span>
-            <span class="info-value">{{ user.email or 'Not Set' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Phone</span>
-            <span class="info-value">{{ user.phone or 'Not Set' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Account Created</span>
-            <span class="info-value">{{ user.created_at }}</span>
-        </div>
-    </div>
-
-    <div class="settings-section">
-        <h2>👥 All Users ({{ all_users|length }})</h2>
-        
-        {% if all_users %}
-        <div style="overflow-x: auto;">
-            <table class="user-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Role</th>
-                        <th>Joined</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in all_users %}
-                    <tr>
-                        <td>{{ u.id }}</td>
-                        <td>{{ u.username }}</td>
-                        <td>{{ u.name or '-' }}</td>
-                        <td>{{ u.email or '-' }}</td>
-                        <td>{{ u.phone or '-' }}</td>
-                        <td>
-                            {% if u.is_admin == 1 %}
-                            <span class="admin-badge">👑 ADMIN</span>
-                            {% else %}
-                            <span class="user-badge">USER</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ u.created_at }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p style="text-align: center; color: #d4b483; padding: 2rem;">No users found</p>
-        {% endif %}
-    </div>
-
-    <div class="settings-section">
-        <h2>ℹ️ System Information</h2>
-        <div class="info-row">
-            <span class="info-label">Application Name</span>
-            <span class="info-value">MY CAFE</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Version</span>
-            <span class="info-value">1.0.0</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Total Users</span>
-            <span class="info-value">{{ all_users|length }}</span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Admin Code Status</span>
-            <span class="info-value">{{ "Configured" if admin_code_configured else "Not Configured" }}</span>
-        </div>
-    </div>
-</body>
-
-</html>
+<script>
+function openRevokeModal(){ document.getElementById('revokeModal').hidden = false; }
+function closeRevokeModal(){ document.getElementById('revokeModal').hidden = true; }
+async function confirmRevoke(){
+    const res = await fetch('/admin/revoke-access', { method:'POST' });
+    const data = await res.json();
+    if(data.success){
+        showNotification('success', data.message || 'Admin access revoked');
+        setTimeout(() => window.location.href = '/profile', 600);
+    }else{
+        showNotification('error', data.error || 'Unable to revoke admin access');
+    }
+}
+</script>
+{% endblock %}
