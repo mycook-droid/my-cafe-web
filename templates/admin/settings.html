@@ -1,9 +1,182 @@
-{% extends "base.html" %}
-{% block content %}
-<section class="admin-settings-page">
-    <div class="admin-head">
-        <h1>Admin Settings</h1>
-        <p>Control cafe configuration safely without exposing customer data.</p>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - MY CAFE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/admin.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1200 0%, #2d1b00 100%);
+            color: #fff8eb;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 157, 0, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 157, 0, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ff9d00, #ff6b00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .back-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 157, 0, 0.1);
+            color: #ff9d00;
+            border: 1px solid rgba(255, 157, 0, 0.3);
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 157, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .settings-section {
+            background: rgba(255, 248, 235, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 157, 0, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #fff8eb;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .user-table th {
+            background: rgba(255, 157, 0, 0.1);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #ff9d00;
+            border-bottom: 1px solid rgba(255, 157, 0, 0.2);
+        }
+
+        .user-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 157, 0, 0.1);
+            color: #fff8eb;
+        }
+
+        .user-table tr:hover {
+            background: rgba(255, 157, 0, 0.05);
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, #ff9d00, #ff6b00);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .user-badge {
+            background: rgba(100, 116, 139, 0.2);
+            color: #94a3b8;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .info-card {
+            background: rgba(255, 248, 235, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 157, 0, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #ff9d00;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 157, 0, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #d4b483;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #fff8eb;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-table {
+                font-size: 0.9rem;
+            }
+
+            .user-table th,
+            .user-table td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>⚙️ Settings</h1>
+        <a href="/admin" class="back-btn">← Back to Dashboard</a>
     </div>
 
     <div class="admin-card">
@@ -64,7 +237,6 @@
 .admin-card.danger{border-color:rgba(255,77,77,.4)}
 .danger-btn{background:#ff4d4d;color:#fff;width:auto;padding:.7rem 1rem;letter-spacing:1px;font-size:16px}
 .app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:2000}
-.app-modal[hidden]{display:none !important}
 .app-modal-dialog{width:min(360px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
 .modal-actions{display:flex;justify-content:flex-end;gap:.6rem}.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);width:auto;padding:.6rem .9rem}
 @media (max-width:640px){.info-grid{grid-template-columns:1fr}}
