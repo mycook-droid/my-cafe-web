@@ -495,6 +495,7 @@
         const style = document.createElement('style');
         style.textContent = `
     .app-modal { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: flex; align-items: center; justify-content: center; z-index: 2100; padding: 1rem; }
+    .app-modal[hidden] { display: none !important; }
     .app-modal-dialog { width: min(340px,100%); background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; }
     .modal-actions { display:flex; justify-content:flex-end; gap:.6rem; margin-top:1rem; }
     .modal-actions button { width:auto; padding:.55rem .9rem; letter-spacing:1px; font-size:16px; }

@@ -1,59 +1,63 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="profile-screen">
-    <div class="profile-header">
-        <h1>Profile & Settings</h1>
+    <div class="profile-hero">
+        <h1>Profile &amp; Settings</h1>
         <p>Manage your account, security, and preferences.</p>
     </div>
 
-    <div class="profile-card" id="profileCard">
-        <div class="avatar" id="profileAvatar">U</div>
-        <div class="profile-meta">
-            <h2 id="profileName">Loading...</h2>
-            <p id="profileEmail">-</p>
-            <p id="profilePhone">-</p>
-            <small id="profileSince">Member since -</small>
+    <div class="profile-shell">
+        <div class="profile-card" id="profileCard">
+            <div class="profile-top">
+                <div class="avatar" id="profileAvatar">U</div>
+                <div class="profile-meta">
+                    <h2 id="profileName">Loading...</h2>
+                    <p id="profileEmail">-</p>
+                    <p id="profilePhone">-</p>
+                    <small id="profileSince">Member since -</small>
+                </div>
+                <button class="mini-btn" type="button" onclick="openModal('editProfileModal')">
+                    <i class="fas fa-pen"></i> Edit
+                </button>
+            </div>
+
+            <div class="stats-stack" id="profileStats">
+                <div class="stat-line"><span>Total Orders</span><strong id="statOrders">0</strong></div>
+                <div class="stat-line"><span>Total Spent</span><strong id="statSpent">₹0</strong></div>
+                <div class="stat-line"><span>Favorite Cafe</span><strong id="statCafe">-</strong></div>
+            </div>
         </div>
-        <button class="mini-btn" type="button" onclick="openModal('editProfileModal')">
-            <i class="fas fa-pen"></i> Edit
-        </button>
-    </div>
 
-    <div class="stats-row" id="profileStats">
-        <div class="stat-box"><span>Total Orders</span><strong id="statOrders">0</strong></div>
-        <div class="stat-box"><span>Total Spent</span><strong id="statSpent">₹0</strong></div>
-        <div class="stat-box"><span>Favorite Cafe</span><strong id="statCafe">-</strong></div>
-    </div>
+        <div class="settings-card">
+            <button class="settings-row" type="button" onclick="openModal('changePasswordModal')">
+                <i class="fas fa-key"></i><span>Change Password</span><i class="fas fa-chevron-right"></i>
+            </button>
+            <a class="settings-row" href="/terms"><i class="fas fa-file-signature"></i><span>Terms &amp; Conditions</span><i class="fas fa-chevron-right"></i></a>
+            <a class="settings-row" href="/privacy"><i class="fas fa-user-shield"></i><span>Privacy Policy</span><i class="fas fa-chevron-right"></i></a>
+            <a class="settings-row" href="https://mycook-droid.github.io/Zishan_droid/" target="_blank" rel="noopener"><i class="fas fa-id-card"></i><span>Developer Details</span><i class="fas fa-chevron-right"></i></a>
+            <a class="settings-row" href="/about"><i class="fas fa-circle-info"></i><span>About Us</span><i class="fas fa-chevron-right"></i></a>
+            <a class="settings-row" href="{{ '/admin/settings' if session.get('is_admin') else '/become-admin' }}"><i class="fas fa-sliders"></i><span>System Settings</span><i class="fas fa-chevron-right"></i></a>
+        </div>
 
-    <div class="settings-card">
-        <button class="settings-row" type="button" onclick="openModal('changePasswordModal')">
-            <i class="fas fa-key"></i><span>Change Password</span><i class="fas fa-chevron-right"></i>
-        </button>
-        <a class="settings-row" href="/terms"><i class="fas fa-file-signature"></i><span>Terms & Conditions</span><i class="fas fa-chevron-right"></i></a>
-        <a class="settings-row" href="/privacy"><i class="fas fa-user-shield"></i><span>Privacy Policy</span><i class="fas fa-chevron-right"></i></a>
-        <a class="settings-row" href="https://mycook-droid.github.io/Zishan_droid/" target="_blank" rel="noopener"><i class="fas fa-id-card"></i><span>Developer Details</span><i class="fas fa-chevron-right"></i></a>
-        <a class="settings-row" href="/about"><i class="fas fa-circle-info"></i><span>About Us</span><i class="fas fa-chevron-right"></i></a>
-        <a class="settings-row" href="{{ '/admin/settings' if session.get('is_admin') else '/become-admin' }}"><i class="fas fa-sliders"></i><span>System Settings</span><i class="fas fa-chevron-right"></i></a>
-    </div>
+        {% if session.get('is_admin') %}
+        <h2 class="settings-group-title">Admin Controls</h2>
+        <div class="settings-card">
+            <a class="settings-row" href="/admin/menu"><i class="fas fa-list-check"></i><span>Manage Menu</span><i class="fas fa-chevron-right"></i></a>
+            <a class="settings-row" href="/admin/orders"><i class="fas fa-bolt"></i><span>Force Actions</span><i class="fas fa-chevron-right"></i></a>
+        </div>
+        {% endif %}
 
-    {% if session.get('is_admin') %}
-    <h2 class="settings-group-title">Admin Controls</h2>
-    <div class="settings-card">
-        <a class="settings-row" href="/admin/menu"><i class="fas fa-list-check"></i><span>Manage Menu</span><i class="fas fa-chevron-right"></i></a>
-        <a class="settings-row" href="/admin/orders"><i class="fas fa-bolt"></i><span>Force Actions</span><i class="fas fa-chevron-right"></i></a>
-    </div>
-    {% endif %}
-
-    <div class="settings-card">
-        <button class="settings-row danger" type="button" onclick="openModal('logoutConfirmModal')">
-            <i class="fas fa-right-from-bracket"></i><span>Logout</span><i class="fas fa-chevron-right"></i>
-        </button>
+        <div class="settings-card danger-wrap">
+            <button class="settings-row danger" type="button" onclick="openModal('logoutConfirmModal')">
+                <i class="fas fa-right-from-bracket"></i><span>Logout</span><i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
     </div>
 </section>
 
 <div class="app-modal" id="editProfileModal" hidden>
-    <div class="app-modal-dialog">
-        <div class="modal-head"><h3>Edit Profile</h3><button type="button" onclick="closeModal('editProfileModal')">×</button></div>
+    <div class="app-modal-dialog form-modal">
+        <div class="modal-head"><h3><i class="fas fa-user-pen"></i> Edit Profile</h3><button type="button" onclick="closeModal('editProfileModal')">×</button></div>
         <form id="editProfileForm" onsubmit="submitProfileEdit(event)">
             <label>Name</label>
             <input type="text" id="editName" name="name" required>
@@ -70,8 +74,8 @@
 </div>
 
 <div class="app-modal" id="changePasswordModal" hidden>
-    <div class="app-modal-dialog">
-        <div class="modal-head"><h3>Change Password</h3><button type="button" onclick="closeModal('changePasswordModal')">×</button></div>
+    <div class="app-modal-dialog form-modal">
+        <div class="modal-head"><h3><i class="fas fa-key"></i> Change Password</h3><button type="button" onclick="closeModal('changePasswordModal')">×</button></div>
         <form id="changePasswordForm" onsubmit="submitPasswordChange(event)">
             <label>Current Password</label>
             <input type="password" name="current_password" required>
@@ -99,24 +103,44 @@
 </div>
 
 <style>
-.profile-card{display:flex;align-items:center;gap:1rem;padding:1rem;border:1px solid var(--border);border-radius:16px;background:var(--surface);margin-bottom:1rem}
-.avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--accent-2);color:var(--accent);font-size:1.5rem;font-weight:700}
-.profile-meta h2{margin:0}.profile-meta p,.profile-meta small{margin:0;color:var(--muted)}
-.mini-btn{width:auto;padding:.6rem 1rem;margin-left:auto}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
-.stat-box{border:1px solid var(--border);border-radius:12px;padding:.75rem;background:var(--surface-2);text-align:center}
-.stat-box span{display:block;color:var(--muted);font-size:.8rem}.stat-box strong{font-size:1rem}
-.settings-row{display:flex;align-items:center;gap:.75rem;width:100%;background:transparent;border:0;color:inherit;text-decoration:none;padding:.85rem}
-.settings-row i:last-child{margin-left:auto}.settings-row.danger{color:#ff7a7a}
+.profile-screen{padding-bottom:1rem}
+.profile-hero{text-align:center;margin:0 auto 1rem;max-width:720px}
+.profile-hero h1{font-size:clamp(2rem,4.8vw,3rem);margin:0;color:#1f2f4a}
+.profile-hero p{margin:.35rem 0 0;color:#475569;font-size:1.06rem}
+.profile-shell{max-width:760px;margin:0 auto;display:grid;gap:1rem}
+.profile-card,.settings-card{background:linear-gradient(180deg,#ffffff 0%,#f9f6f1 100%);border:1px solid #e7e2d7;border-radius:24px;box-shadow:0 10px 30px rgba(15,23,42,.08)}
+.profile-card{padding:1rem}
+.profile-top{display:flex;align-items:center;gap:1rem}
+.avatar{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f6d786,#e9b949);color:#9a5c00;font-size:1.9rem;font-weight:700;border:2px solid #fff;box-shadow:0 4px 18px rgba(233,185,73,.45)}
+.profile-meta h2{margin:0;color:#24354e;font-size:2rem}
+.profile-meta p,.profile-meta small{margin:.1rem 0;color:#475569}
+.mini-btn{margin-left:auto;width:auto;padding:.7rem 1.25rem;border-radius:16px;background:linear-gradient(135deg,#1b3767,#0f2548);border:1px solid rgba(122,178,255,.6);box-shadow:0 8px 20px rgba(15,37,72,.35);font-size:1.15rem}
+.stats-stack{margin-top:1rem;border-top:1px solid #ece5d8;padding-top:.7rem;display:grid;gap:.45rem}
+.stat-line{display:flex;justify-content:space-between;align-items:center;padding:.35rem .2rem;color:#334155;font-size:1.18rem}
+.stat-line strong{font-size:1.9rem;color:#1f2f4a}
+.settings-card{overflow:hidden}
+.settings-row{display:flex;align-items:center;gap:.75rem;width:100%;background:transparent;border:0;color:#334155;text-decoration:none;padding:1rem 1rem;font-size:1.22rem;border-bottom:1px solid #ece7dc}
+.settings-row:last-child{border-bottom:none}.settings-row i:first-child{width:24px;color:#475569}.settings-row i:last-child{margin-left:auto;color:#9ca3af}
+.settings-group-title{margin:.5rem .3rem 0;color:#334155;font-size:1.05rem;letter-spacing:.4px}
+.danger-wrap{border:1px solid #f6d6d6}
+.settings-row.danger{color:#b91c1c}.settings-row.danger i:first-child{color:#b91c1c}
 .app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:1rem;z-index:2000}
+.app-modal[hidden]{display:none !important}
 .app-modal-dialog{width:min(460px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
 .app-modal-dialog.compact{width:min(360px,100%)}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
-.modal-head button{width:auto;background:transparent;color:var(--text);font-size:1.4rem;padding:0 .4rem}
+.form-modal{background:linear-gradient(170deg,#ffffff 0%,#f8f4ec 100%);border:1px solid #e8e1d6;border-radius:20px;box-shadow:0 22px 48px rgba(15,23,42,.25);padding:1rem}
+.form-modal form{display:grid;gap:.7rem}
+.form-modal label{font-size:.92rem;font-weight:700;color:#4b5563;letter-spacing:.5px}
+.form-modal input{width:100%;border:1px solid #d9d7d2;background:#fff;color:#1f2937;border-radius:12px;padding:.72rem .82rem;font-size:1rem;outline:none;transition:border-color .2s, box-shadow .2s}
+.form-modal input:focus{border-color:#7aa2dd;box-shadow:0 0 0 3px rgba(64,125,215,.18)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem}
+.modal-head h3{margin:0;color:#20344f;display:flex;align-items:center;gap:.45rem}
+.modal-head button{width:auto;background:transparent;color:#334155;font-size:1.45rem;padding:0 .45rem;border:1px solid #d9d8d3;border-radius:10px}
 .modal-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem}
-.modal-actions button{width:auto;padding:.6rem 1rem;letter-spacing:1px;font-size:16px}
-.modal-actions .ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
-@media (max-width:640px){.stats-row{grid-template-columns:1fr}.profile-card{align-items:flex-start;flex-wrap:wrap}.mini-btn{margin-left:0}}
+.modal-actions button{width:auto;padding:.67rem 1rem;letter-spacing:.7px;font-size:1rem;border-radius:12px}
+.form-modal .modal-actions button[type=\"submit\"]{background:linear-gradient(135deg,#1c3e71,#122a4f);border:1px solid rgba(116,168,238,.7);box-shadow:0 10px 20px rgba(12,35,70,.32)}
+.modal-actions .ghost{background:transparent;color:#546173;border:1px solid #d2d7df}
+@media (max-width:640px){.profile-meta h2{font-size:1.45rem}.profile-top{flex-wrap:wrap}.mini-btn{margin-left:0}.settings-row{font-size:1.05rem}.stat-line{font-size:1rem}.stat-line strong{font-size:1.65rem}}
 </style>
 
 <script>
