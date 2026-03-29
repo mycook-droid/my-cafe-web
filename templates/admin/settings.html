@@ -175,38 +175,46 @@
             <button type="button" class="danger-btn" onclick="openRevokeModal()"><i class="fa-regular fa-trash-can"></i> Revoke My Admin Access</button>
         </div>
     </div>
-
-    <div class="app-modal" id="revokeModal" hidden>
-        <div class="app-modal-dialog compact">
-            <h3>Revoke admin access?</h3>
-            <p style="margin:.45rem 0 .8rem;color:#e4bd86;">This action removes admin rights from your current account.</p>
-            <div class="modal-actions">
-                <button type="button" class="ghost" onclick="closeRevokeModal()">Cancel</button>
-                <button type="button" class="danger-btn" onclick="confirmRevoke()">Yes, Revoke</button>
-            </div>
+<div class="app-modal" id="revokeModal" hidden>
+    <div class="app-modal-dialog compact">
+        <h3>Revoke admin access?</h3>
+        <p>This action removes admin rights from your current account.</p>
+        <div class="modal-actions">
+            <button type="button" class="ghost" onclick="closeRevokeModal()">Cancel</button>
+            <button type="button" class="danger-btn" onclick="confirmRevoke()">Yes, Revoke</button>
         </div>
     </div>
 
-    <script>
-        function openRevokeModal(){ document.getElementById('revokeModal').hidden = false; }
-        function closeRevokeModal(){ document.getElementById('revokeModal').hidden = true; }
-        async function confirmRevoke(){
-            const res = await fetch('/admin/revoke-access', { method:'POST' });
-            const data = await res.json();
-            if(data.success){
-                if (typeof showNotification === 'function') {
-                    showNotification('success', data.message || 'Admin access revoked');
-                }
-                setTimeout(() => window.location.href = '/profile', 600);
-            }else{
-                if (typeof showNotification === 'function') {
-                    showNotification('error', data.error || 'Unable to revoke admin access');
-                } else {
-                    alert(data.error || 'Unable to revoke admin access');
-                }
-            }
-        }
-    </script>
+<style>
+.admin-settings-page{display:grid;gap:1rem}.admin-head p{color:var(--muted)}
+.admin-card{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:1rem}
+.row-between{display:flex;justify-content:space-between;align-items:center}.small-link{color:var(--accent)}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin-top:.75rem}
+.info-grid span{display:block;color:var(--muted);font-size:.8rem}
+.links{display:grid;gap:.5rem}.links a{padding:.65rem;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text)}
+.admin-card.danger{border-color:rgba(255,77,77,.4)}
+.danger-btn{background:#ff4d4d;color:#fff;width:auto;padding:.7rem 1rem;letter-spacing:1px;font-size:16px}
+.app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:2000}
+.app-modal[hidden]{display:none !important}
+.app-modal-dialog{width:min(360px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:.6rem}.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);width:auto;padding:.6rem .9rem}
+@media (max-width:640px){.info-grid{grid-template-columns:1fr}}
+</style>
+
+<script>
+function openRevokeModal(){ document.getElementById('revokeModal').hidden = false; }
+function closeRevokeModal(){ document.getElementById('revokeModal').hidden = true; }
+async function confirmRevoke(){
+    const res = await fetch('/admin/revoke-access', { method:'POST' });
+    const data = await res.json();
+    if(data.success){
+        showNotification('success', data.message || 'Admin access revoked');
+        setTimeout(() => window.location.href = '/profile', 600);
+    }else{
+        showNotification('error', data.error || 'Unable to revoke admin access');
+    }
+}
+</script>
 </body>
 
 </html>
