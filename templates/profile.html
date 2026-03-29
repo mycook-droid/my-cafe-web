@@ -56,8 +56,8 @@
 </section>
 
 <div class="app-modal" id="editProfileModal" hidden>
-    <div class="app-modal-dialog">
-        <div class="modal-head"><h3>Edit Profile</h3><button type="button" onclick="closeModal('editProfileModal')">×</button></div>
+    <div class="app-modal-dialog form-modal">
+        <div class="modal-head"><h3><i class="fas fa-user-pen"></i> Edit Profile</h3><button type="button" onclick="closeModal('editProfileModal')">×</button></div>
         <form id="editProfileForm" onsubmit="submitProfileEdit(event)">
             <label>Name</label>
             <input type="text" id="editName" name="name" required>
@@ -74,8 +74,8 @@
 </div>
 
 <div class="app-modal" id="changePasswordModal" hidden>
-    <div class="app-modal-dialog">
-        <div class="modal-head"><h3>Change Password</h3><button type="button" onclick="closeModal('changePasswordModal')">×</button></div>
+    <div class="app-modal-dialog form-modal">
+        <div class="modal-head"><h3><i class="fas fa-key"></i> Change Password</h3><button type="button" onclick="closeModal('changePasswordModal')">×</button></div>
         <form id="changePasswordForm" onsubmit="submitPasswordChange(event)">
             <label>Current Password</label>
             <input type="password" name="current_password" required>
@@ -128,8 +128,14 @@
 .app-modal[hidden]{display:none !important}
 .app-modal-dialog{width:min(460px,100%);background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1rem}
 .app-modal-dialog.compact{width:min(360px,100%)}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
-.modal-head button{width:auto;background:transparent;color:var(--text);font-size:1.4rem;padding:0 .4rem}
+.form-modal{background:linear-gradient(170deg,#ffffff 0%,#f8f4ec 100%);border:1px solid #e8e1d6;border-radius:20px;box-shadow:0 22px 48px rgba(15,23,42,.25);padding:1rem}
+.form-modal form{display:grid;gap:.7rem}
+.form-modal label{font-size:.92rem;font-weight:700;color:#4b5563;letter-spacing:.5px}
+.form-modal input{width:100%;border:1px solid #d9d7d2;background:#fff;color:#1f2937;border-radius:12px;padding:.72rem .82rem;font-size:1rem;outline:none;transition:border-color .2s, box-shadow .2s}
+.form-modal input:focus{border-color:#7aa2dd;box-shadow:0 0 0 3px rgba(64,125,215,.18)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem}
+.modal-head h3{margin:0;color:#20344f;display:flex;align-items:center;gap:.45rem}
+.modal-head button{width:auto;background:transparent;color:#334155;font-size:1.45rem;padding:0 .45rem;border:1px solid #d9d8d3;border-radius:10px}
 .modal-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem}
 .modal-actions button{width:auto;padding:.6rem 1rem;letter-spacing:1px;font-size:16px}
 .modal-actions .ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
