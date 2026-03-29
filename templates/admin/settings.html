@@ -5,214 +5,175 @@
     <meta charset="UTF-8">
     <title>Settings - MY CAFE</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --amber: #ffab2e;
+            --amber-2: #ff8f1f;
+            --text: #fff4df;
+            --muted: #dfbf8f;
+            --card: rgba(255, 171, 46, 0.08);
+            --border: rgba(255, 171, 46, 0.26);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a1200 0%, #2d1b00 100%);
-            color: #fff8eb;
-            padding: 1rem;
             min-height: 100vh;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 80% 18%, rgba(255, 153, 33, .26), transparent 32%),
+                radial-gradient(circle at 22% 70%, rgba(255, 120, 40, .2), transparent 35%),
+                linear-gradient(140deg, #1a1006 0%, #2a1607 45%, #170b03 100%);
+            padding: 1rem;
         }
 
+        .wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 1rem; }
+
         .header {
-            background: rgba(255, 157, 0, 0.1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 157, 0, 0.2);
-            border-radius: 16px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
             padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+            background: linear-gradient(160deg, rgba(255,171,46,.13), rgba(255,171,46,.05));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.35);
+            text-align: center;
         }
 
         .header h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #ff9d00, #ff6b00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            color: var(--amber);
+            margin-bottom: 1rem;
+            font-weight: 800;
         }
 
         .back-btn {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 157, 0, 0.1);
-            color: #ff9d00;
-            border: 1px solid rgba(255, 157, 0, 0.3);
-            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: .55rem;
             text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
+            color: #ffbf66;
+            border: 1px solid rgba(255,171,46,.35);
+            border-radius: 14px;
+            padding: .8rem 1.2rem;
+            background: rgba(255,171,46,.08);
+            font-size: 1.3rem;
         }
 
-        .back-btn:hover {
-            background: rgba(255, 157, 0, 0.2);
-            transform: translateY(-2px);
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 1.2rem;
+            background: linear-gradient(165deg, rgba(255,171,46,.12), rgba(255,171,46,.04));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 34px rgba(0,0,0,.28);
         }
 
-        .settings-section {
-            background: rgba(255, 248, 235, 0.08);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 157, 0, 0.2);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+        .row-between { display: flex; justify-content: space-between; align-items: center; gap: .6rem; }
+        .card h2 { font-size: 2rem; margin-bottom: .9rem; color: #ffe3bc; }
+
+        .small-link {
+            text-decoration: none;
+            color: #ffe7c1;
+            border: 1px solid rgba(255,171,46,.42);
+            border-radius: 14px;
+            padding: .6rem 1rem;
+            background: rgba(36,21,8,.55);
+            box-shadow: 0 0 12px rgba(255,171,46,.22);
+            font-weight: 700;
         }
 
-        .settings-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: #fff8eb;
-        }
+        .info-grid { display: grid; gap: .9rem; }
+        .info-grid span { display:block; color: var(--muted); font-size: 1.3rem; margin-bottom: .2rem; }
+        .info-grid strong { display:block; font-size: 2rem; color: #fff8ed; word-break: break-word; }
 
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .user-table th {
-            background: rgba(255, 157, 0, 0.1);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #ff9d00;
-            border-bottom: 1px solid rgba(255, 157, 0, 0.2);
-        }
-
-        .user-table td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 157, 0, 0.1);
-            color: #fff8eb;
-        }
-
-        .user-table tr:hover {
-            background: rgba(255, 157, 0, 0.05);
-        }
-
-        .admin-badge {
-            background: linear-gradient(135deg, #ff9d00, #ff6b00);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .user-badge {
-            background: rgba(100, 116, 139, 0.2);
-            color: #94a3b8;
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .info-card {
-            background: rgba(255, 248, 235, 0.08);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 157, 0, 0.2);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .info-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: #ff9d00;
-        }
-
-        .info-row {
+        .links { margin-top: .35rem; display: grid; }
+        .links a {
+            text-decoration: none;
+            color: #f8dfb7;
             display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(255, 157, 0, 0.1);
+            align-items: center;
+            gap: .7rem;
+            padding: .95rem .2rem;
+            border-bottom: 1px solid rgba(255,171,46,.16);
+            font-size: 1.5rem;
+        }
+        .links a:last-child{border-bottom:none}
+        .links i:last-child { margin-left: auto; color: #e9bb75; }
+
+        .danger h2{color:#ffad53}
+        .danger p{color:#efc18e;font-size:1.35rem;line-height:1.45}
+
+        .danger-btn {
+            margin-top: .9rem;
+            border: 0;
+            width: auto;
+            padding: .82rem 1.1rem;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #f06147, #dc3d2f);
+            font-size: 1.45rem;
+            font-weight: 700;
         }
 
-        .info-row:last-child {
-            border-bottom: none;
-        }
+        .app-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:2000}
+        .app-modal[hidden]{display:none !important}
+        .app-modal-dialog{width:min(360px,100%);background:#2a1a0f;border:1px solid var(--border);border-radius:14px;padding:1rem}
+        .modal-actions{display:flex;justify-content:flex-end;gap:.6rem}
+        .ghost{background:transparent;color:var(--muted);border:1px solid var(--border);width:auto;padding:.6rem .9rem}
 
-        .info-label {
-            color: #d4b483;
-            font-weight: 500;
-        }
-
-        .info-value {
-            color: #fff8eb;
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .user-table {
-                font-size: 0.9rem;
-            }
-
-            .user-table th,
-            .user-table td {
-                padding: 0.75rem 0.5rem;
-            }
+        @media (max-width:640px){
+            .header, .card { border-radius: 20px; }
+            .card h2 { font-size: 1.8rem; }
+            .info-grid span { font-size: 1.15rem; }
+            .info-grid strong { font-size: 1.65rem; }
+            .links a { font-size: 1.22rem; }
+            .back-btn { font-size: 1.1rem; }
+            .danger p { font-size: 1.08rem; }
+            .danger-btn { font-size: 1.2rem; }
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1>⚙️ Settings</h1>
-        <a href="/admin" class="back-btn">← Back to Dashboard</a>
-    </div>
-
-    <div class="admin-card">
-        <div class="row-between">
-            <h2>Cafe Info</h2>
-            <a class="small-link" href="/admin/cafe-settings">Edit</a>
+    <div class="wrap">
+        <div class="header">
+            <h1><i class="fa-solid fa-gear"></i> Settings</h1>
+            <a href="/admin" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
         </div>
-        <div class="info-grid">
-            <div><span>Name</span><strong>{{ cafe_settings.cafe_name or 'MY CAFE' }}</strong></div>
-            <div><span>Phone</span><strong>{{ cafe_settings.phone or '-' }}</strong></div>
-            <div><span>Address</span><strong>{{ cafe_settings.address or '-' }}</strong></div>
-            <div><span>Logo URL</span><strong>{{ cafe_settings.logo_url or '-' }}</strong></div>
-        </div>
-    </div>
 
-    <div class="admin-card">
-        <h2>Current Admin</h2>
-        <div class="info-grid">
-            <div><span>Username</span><strong>{{ user.username }}</strong></div>
-            <div><span>Name</span><strong>{{ user.name or '-' }}</strong></div>
+        <div class="card">
+            <div class="row-between">
+                <h2>Cafe Info</h2>
+                <a class="small-link" href="/admin/cafe-settings"><i class="fa-solid fa-pen"></i> Edit</a>
+            </div>
+            <div class="info-grid">
+                <div><span>Name</span><strong>{{ cafe_settings.cafe_name or 'MY CAFE' }}</strong></div>
+                <div><span>Phone</span><strong>{{ cafe_settings.phone or '-' }}</strong></div>
+                <div><span>Address</span><strong>{{ cafe_settings.address or '-' }}</strong></div>
+                <div><span>Logo URL</span><strong>{{ cafe_settings.logo_url or '-' }}</strong></div>
+            </div>
         </div>
-    </div>
 
-    <div class="admin-card">
-        <h2>Quick Links</h2>
-        <div class="links">
-            <a href="/admin/tax-settings">Tax Settings</a>
-            <a href="/admin/menu">Menu Management</a>
-            <a href="/admin/orders">Kitchen Display</a>
+        <div class="card">
+            <h2>Current Admin</h2>
+            <div class="info-grid" style="margin-bottom:.45rem;">
+                <div><span>Username</span><strong>{{ user.username }}</strong></div>
+                <div><span>Name</span><strong>{{ user.name or '-' }}</strong></div>
+            </div>
+            <div class="links">
+                <a href="/admin/tax-settings"><i class="fa-solid fa-file-invoice-dollar"></i> Tax Settings <i class="fa-solid fa-chevron-right"></i></a>
+                <a href="/admin/menu"><i class="fa-solid fa-clipboard-list"></i> Menu Management <i class="fa-solid fa-chevron-right"></i></a>
+                <a href="/admin/orders"><i class="fa-solid fa-kitchen-set"></i> Kitchen Display <i class="fa-solid fa-chevron-right"></i></a>
+            </div>
         </div>
-    </div>
 
-    <div class="admin-card danger">
-        <h2>Danger Zone</h2>
-        <p>Revoke your own admin access. You can request access again from your profile.</p>
-        <button type="button" class="danger-btn" onclick="openRevokeModal()">Revoke My Admin Access</button>
+        <div class="card danger">
+            <h2>Danger Zone</h2>
+            <p>Revoke your own admin access. You can request access again from your profile.</p>
+            <button type="button" class="danger-btn" onclick="openRevokeModal()"><i class="fa-regular fa-trash-can"></i> Revoke My Admin Access</button>
+        </div>
     </div>
 <div class="app-modal" id="revokeModal" hidden>
     <div class="app-modal-dialog compact">
@@ -223,7 +184,6 @@
             <button type="button" class="danger-btn" onclick="confirmRevoke()">Yes, Revoke</button>
         </div>
     </div>
-</div>
 
 <style>
 .admin-settings-page{display:grid;gap:1rem}.admin-head p{color:var(--muted)}
