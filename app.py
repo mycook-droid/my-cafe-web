@@ -1,5 +1,5 @@
 # File: app.py (BASE VERSION - PART 1/3)
-from flask import Flask, render_template, request, redirect, session, jsonify, url_for
+from flask import Flask, render_template, request, redirect, session, jsonify, url_for, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime, timedelta
@@ -1711,6 +1711,13 @@ def tax_settings():
 
     settings = db.get_tax_settings()
     return render_template('admin/tax_settings.html', settings=settings)
+
+@app.route("/service-worker.js")
+def service_worker():
+    response = send_from_directory("static", "service-worker.js")
+    response.headers["Service-Worker-Allowed"] = "/"
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 # =========================
 # LEGAL PAGES
