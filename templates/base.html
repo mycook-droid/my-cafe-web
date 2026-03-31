@@ -14,6 +14,9 @@
         content="QR-based ordering, real-time kitchen display, and seamless billing. Created by Zishan Ali.">
     <meta property="og:url" content="https://mycook-droid.github.io/Zishan_droid/">
     <meta property="og:type" content="website">
+    <meta name="theme-color" content="#e17055">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg">
 
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -513,6 +516,15 @@
     }
 `;
         document.head.appendChild(style);
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+                    console.log('Service worker registration failed:', error);
+                });
+            });
+        }
     </script>
 </body>
 
